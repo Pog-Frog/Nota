@@ -3,8 +3,10 @@ import { Link, NavLink } from "react-router";
 import { Spin as Hamburger } from "hamburger-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Search } from "lucide-react";
+import SearchButton from "../components/ui/SearchButton";
+import SearchModal from "../components/ui/SearchModal";
 
 const Header = () => {
     const headerLinks = [
@@ -21,8 +23,6 @@ const Header = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [shrinkHeader, setShrinkHeader] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [showTooltip, setShowTooltip] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -57,12 +57,8 @@ const Header = () => {
         setMenuOpen(!menuOpen);
     };
 
-    const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        // TODO: Implement search functionality here
-        console.log("Search:", searchQuery);
-        setSearchQuery("");
-        setSearchOpen(false);
+    const handleSearch = (query: string) => {
+        console.log("Search query from header:", query);
     };
 
     const logoVariants = {
@@ -103,36 +99,6 @@ const Header = () => {
             opacity: 1,
             y: 0,
             transition: { type: "spring", stiffness: 300, damping: 24 }
-        }
-    };
-
-    const searchButtonVariants = {
-        hover: {
-            scale: 1.1,
-            transition: { type: "spring", stiffness: 400, damping: 10 }
-        },
-        tap: {
-            scale: 0.95
-        }
-    };
-
-    const searchModalVariants = {
-        hidden: {
-            opacity: 0,
-            y: -20,
-            scale: 0.95
-        },
-        visible: {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: { type: "spring", stiffness: 400, damping: 25 }
-        },
-        exit: {
-            opacity: 0,
-            y: -20,
-            scale: 0.95,
-            transition: { duration: 0.2 }
         }
     };
 
@@ -185,51 +151,7 @@ const Header = () => {
                                 </motion.li>
                             ))}
 
-                            {/* Search Button */}
-                            <motion.div
-                                className="relative ml-2"
-                                variants={searchButtonVariants}
-                                whileHover="hover"
-                                whileTap="tap"
-                                onMouseEnter={() => setShowTooltip(true)}
-                                onMouseLeave={() => setShowTooltip(false)}
-                            >
-                                <motion.div
-                                    className="relative ml-2"
-                                    variants={searchButtonVariants}
-                                    whileHover="hover"
-                                    whileTap="tap"
-                                    onMouseEnter={() => setShowTooltip(true)}
-                                    onMouseLeave={() => setShowTooltip(false)}
-                                >
-                                    <button
-                                        onClick={() => setSearchOpen(true)}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <Search size={18} />
-                                        <span className="text-sm">Search</span>
-                                        <div className="hidden sm:flex items-center px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
-                                            CTRL K
-                                        </div>
-                                    </button>
-
-                                    {/* Tooltip */}
-                                    <AnimatePresence>
-                                        {showTooltip && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -10 }}
-                                                transition={{ duration: 0.2 }}
-                                                className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 bg-gray-800 dark:bg-gray-700 text-white text-xs rounded shadow-lg whitespace-nowrap z-10"
-                                            >
-                                                Press Ctrl+K to search
-                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800 dark:border-b-gray-700"></div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </motion.div>
-                            </motion.div>
+                            <SearchButton onClick={() => setSearchOpen(true)} />
 
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
@@ -243,11 +165,9 @@ const Header = () => {
 
                     {/* Mobile Menu Controls */}
                     <div className="flex items-center gap-4 z-50 lg:hidden">
-                        {/* Mobile Search Button */}
                         <motion.button
-                            variants={searchButtonVariants}
-                            whileHover="hover"
-                            whileTap="tap"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => setSearchOpen(true)}
                             className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                         >
@@ -310,67 +230,11 @@ const Header = () => {
                 </div>
             </motion.div>
 
-            {/* Search Modal */}
-            <AnimatePresence>
-                {searchOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.5 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-                            onClick={() => setSearchOpen(false)}
-                        />
-                        <motion.div
-                            className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4"
-                            variants={searchModalVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                        >
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-                                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                                    <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 px-3">
-                                        <Search className="text-gray-400" size={20} />
-                                        <input
-                                            type="text"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="Search for anything..."
-                                            className="flex-1 py-3 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-400"
-                                            autoFocus
-                                        />
-                                        <div className="flex items-center gap-2">
-                                            <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500 dark:text-gray-400">ESC</kbd>
-                                            <button
-                                                type="button"
-                                                onClick={() => setSearchOpen(false)}
-                                                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                <X size={18} className="text-gray-500 dark:text-gray-400" />
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div className="p-4 max-h-80 overflow-y-auto">
-                                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                                        Start typing to search...
-                                    </div>
-                                </div>
-
-                                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 flex justify-end">
-                                    <div className="flex items-center gap-2">
-                                        <span>Press</span>
-                                        <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-400">Enter</kbd>
-                                        <span>to select</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            <SearchModal 
+                isOpen={searchOpen}
+                onClose={() => setSearchOpen(false)}
+                onSearch={handleSearch}
+            />
         </>
     );
 };
