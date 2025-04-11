@@ -1,5 +1,5 @@
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "../context/themeProvider";
+import { useTheme } from "../context/ThemeProvider";
 import { motion } from "framer-motion";
 
 function ThemeSwitch() {

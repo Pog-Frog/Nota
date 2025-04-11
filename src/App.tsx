@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router';
 import RootLayout from './layouts/RootLayout';
 import HomePage from './pages/HomePage';
-import { ThemeProvider } from './context/themeProvider';
+import { ThemeProvider } from './context/ThemeProvider';
 
 function App() {
   return (
