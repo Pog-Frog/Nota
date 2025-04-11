@@ -8,7 +8,7 @@ function ThemeSwitch() {
 
   return (
     <motion.div
-      className="relative w-12 h-12 rounded-full flex items-center justify-center cursor-pointer"
+      className="relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
       whileTap={{ scale: 0.9 }}
     >
       <motion.div
