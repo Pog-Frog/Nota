@@ -114,52 +114,45 @@ const HomePage = () => {
                 </div>
 
                 <div className="mt-16">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-6">
-                        Featured Posts
-                    </h2>
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-gray-900 dark:text-white">
+                            Recent Blogs
+                        </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300">
-                            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                                STRATEGY
-                            </span>
-                            <h3 className="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">
-                                How to build a product roadmap everyone understands
-                            </h3>
-                            <p className="mt-3 text-gray-600 dark:text-gray-300">
-                                Learn how to create a product roadmap that aligns your team and clearly communicates your product strategy.
-                            </p>
-                            <div className="mt-4 flex items-center">
-                                <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Alex Johnson</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Product Director • 5 min read</p>
-                                </div>
-                            </div>
-                        </div>
+                        <div className="flex flex-wrap md:flex-nowrap gap-2 pb-2 w-full lg:w-auto">
+                            <button className="px-4 h-9 bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold hover:scale-110 transition-transform duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50">
+                                Learn
+                            </button>
 
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300">
-                            <span className="text-xs font-semibold text-green-600 dark:text-green-400">
-                                RESEARCH
-                            </span>
-                            <h3 className="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">
-                                User interviews that actually provide useful insights
-                            </h3>
-                            <p className="mt-3 text-gray-600 dark:text-gray-300">
-                                Discover techniques for conducting user interviews that reveal actionable insights for your product development.
-                            </p>
-                            <div className="mt-4 flex items-center">
-                                <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Maria Chen</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">UX Researcher • 8 min read</p>
-                                </div>
-                            </div>
+                            <button className="px-4 h-9 bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold hover:scale-110 transition-transform duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50">
+                                Tools
+                            </button>
+
+                            <button className="px-4 h-9 bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold hover:scale-110 transition-transform duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50">
+                                Tech
+                            </button>
+
+                            <button className="px-4 h-9 bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold hover:scale-110 transition-transform duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50">
+                                Operations
+                            </button>
+
+                            <button className="px-4 h-9 bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold hover:scale-110 transition-transform duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50">
+                                Inspiration
+                            </button>
+
+                            <button className="px-4 h-9 bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold hover:scale-110 transition-transform duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50">
+                                News
+                            </button>
                         </div>
+                    </div>
+
+                    {/* TODO: Add articles here */}
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
+                        Blogs here
                     </div>
                 </div>
 
-                {/* Footer */}
+                {/* TODO: Footer */}
             </div>
         </div>
     );
