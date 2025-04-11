@@ -45,7 +45,7 @@ const HomePage = () => {
                     </h1>
 
                     <p className="mt-6 text-lg leading-8 max-w-2xl mx-auto text-gray-600 dark:text-gray-300">
-                        Discover actionable insights, proven strategies, and innovative approaches to transform your product management process and make sense of user feedback at scale.
+                        Words that linger, ideas that stick. Read, reflect, repeat.
                     </p>
                 </div>
 
