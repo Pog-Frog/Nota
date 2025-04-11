@@ -9,6 +9,7 @@ const RootLayout = () => {
                 <div className="flex flex-col">
                     <Outlet />
                 </div>
+                {/* TODO: Footer */}
             </div>
         </>
     );

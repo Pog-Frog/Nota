@@ -17,8 +17,6 @@ const HomePage = () => {
                 <CategorySection />
 
                 <RecentBlogsSection />
-
-                {/* TODO: Footer */}
             </div>
         </div>
     );
