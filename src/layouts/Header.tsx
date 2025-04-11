@@ -2,7 +2,7 @@ import { FaBook } from "react-icons/fa";
 import { Link, NavLink } from "react-router";
 import { Spin as Hamburger } from "hamburger-react";
 import { useEffect, useState } from "react";
-import ThemeSwitch from "./ThemeSwitch";
+import ThemeSwitch from "../components/ThemeSwitch";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X } from "lucide-react";
 
