@@ -3,12 +3,29 @@
 @custom-variant dark (&:is(.dark *));
 
 @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
   }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 8s ease infinite;
+  background-size: 300% 100%;
+}
+
+.dotted-background {
+  background-image: radial-gradient(#181818 5%, #0000001f 15%);
   
-  .animate-gradient {
-    animation: gradient 8s ease infinite;
-    background-size: 300% 100%;
-  }
+}
+
+.dotted-background {
+  background-position: 0 0, 14px 14px;
+  background-size: 16px 16px;
+  width: 100%;
+}
