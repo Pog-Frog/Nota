@@ -6,7 +6,7 @@ import { ThemeProvider } from './context/ThemeProvider';
 function App() {
   return (
     <>
-      <ThemeProvider defaultTheme='light'>
+      <ThemeProvider defaultTheme='dark'>
         <Routes>
           <Route element={<RootLayout />}>
             <Route path='/' element={<HomePage />} />
