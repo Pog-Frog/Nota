@@ -8,7 +8,7 @@ const RootLayout = () => {
                 <div className="absolute left-0 right-0 bottom-0">
                 </div>
             </div>
-            <div className="flex flex-col min-h-screen dark:bg-black">
+            <div className="flex flex-col min-h-screen">
                 <Header />
                 <div className="flex flex-col">
                     <Outlet />

@@ -2,6 +2,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+  @apply dark:bg-black
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
