@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import Header from "./Header";
+import Footer from "../components/Footer";
 
 const RootLayout = () => {
     return (
@@ -13,7 +14,7 @@ const RootLayout = () => {
                 <div className="flex flex-col">
                     <Outlet />
                 </div>
-                {/* TODO: Footer */}
+                <Footer />
             </div>
         </>
     );
