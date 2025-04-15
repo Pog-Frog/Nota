@@ -203,7 +203,7 @@ function App() {
                     initial="hidden"
                     animate="visible"
                     transition={{ delay: 0.2 }}
-                    className="prose dark:prose-invert prose-sm sm:prose-base md:prose-lg max-w-none prose-img:rounded-lg prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-4 sm:p-6 md:p-8 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg mb-6 sm:mb-8 overflow-x-auto"
+                    className="ql-editor prose dark:prose-invert prose-sm sm:prose-base md:prose-lg max-w-none prose-img:rounded-lg prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-4 sm:p-6 md:p-8 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg mb-6 sm:mb-8 overflow-x-auto"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                 ></motion.div>
 
