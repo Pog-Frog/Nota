@@ -299,10 +299,10 @@ const CreatePostPage = () => {
                                 modules={modules}
                                 formats={formats}
                                 placeholder="Write your blog post content here..."
-                                className="bg-white dark:bg-gray-800 h-64 sm:h-80 md:h-96 lg:h-96 border-gray-300 dark:border-gray-700 rounded-lg"
+                                className="bg-white dark:bg-gray-800 h-120 border-gray-300 dark:border-gray-700 rounded-lg pb-10 mb-10"
                             />
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                             Use the toolbar above to format text, add links, and insert images.
                         </p>
                     </motion.div>
