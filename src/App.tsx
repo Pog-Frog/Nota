@@ -3,6 +3,7 @@ import RootLayout from './layouts/RootLayout';
 import HomePage from './pages/HomePage';
 import { ThemeProvider } from './context/ThemeProvider';
 import CreatePostPage from './pages/CreatepostPage';
+import ViewPostPage from './pages/ViewpostPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route element={<RootLayout />}>
             <Route path='/' element={<HomePage />} />
             <Route path='/create' element={<CreatePostPage />} />
+            <Route path='/blog' element={<ViewPostPage />} />
           </Route>
         </Routes>
       </ThemeProvider>
