@@ -1,0 +1,38 @@
+.dark .ql-toolbar {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .ql-toolbar .ql-stroke {
+  stroke: #d1d5db !important;
+}
+
+.dark .ql-toolbar .ql-fill {
+  fill: #d1d5db !important;
+}
+
+.dark .ql-toolbar .ql-picker {
+  color: #d1d5db !important;
+}
+
+.dark .ql-toolbar .ql-picker-options {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .ql-editor {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ql-container {
+  border-color: #4b5563 !important;
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: #d1d5db !important;
+}
+
+ol li[data-list="bullet"]:not(.ql-editor ol li[data-list="bullet"]) {
+  list-style-type: disc;
+}
