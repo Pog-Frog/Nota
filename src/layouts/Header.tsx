@@ -4,11 +4,17 @@ import { Spin as Hamburger } from "hamburger-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { LogInIcon, LogOutIcon, Search } from "lucide-react";
 import SearchButton from "../components/ui/SearchButton";
 import SearchModal from "../components/ui/SearchModal";
+import { useAuthStore } from "../store/AuthStore";
+import { User } from "lucide-react"
 
-const Header = () => {
+interface HeaderProps {
+    showSearch?: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ showSearch = true }) => {
     const headerLinks = [
         {
             text: "Home",
@@ -20,6 +26,7 @@ const Header = () => {
         }
     ];
 
+    const { isAuthenticated, user, logout } = useAuthStore();
     const [menuOpen, setMenuOpen] = useState(false);
     const [shrinkHeader, setShrinkHeader] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
@@ -151,7 +158,53 @@ const Header = () => {
                                 </motion.li>
                             ))}
 
-                            <SearchButton onClick={() => setSearchOpen(true)} />
+                            {isAuthenticated ? (
+                                <div className="relative group">
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-full border border-indigo-100 dark:border-indigo-800 text-gray-800 dark:text-gray-200 shadow-sm cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-7 w-7 rounded-full bg-indigo-100 dark:bg-indigo-700/60 flex items-center justify-center">
+                                                <User className="text-indigo-600 dark:text-indigo-300" size={16} />
+                                            </div>
+                                            <span className="font-medium text-sm">
+                                                {user?.displayName || 'User'}
+                                            </span>
+                                        </div>
+                                    </motion.div>
+                                    <div className="absolute right-0 mt-2 w-28 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right">
+                                        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg outline-none focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 ring-opacity-5 overflow-hidden">
+                                            <button
+                                                onClick={() => logout()}
+                                                className="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-colors duration-150 hover:cursor-pointer"
+                                            >
+                                                Log out
+                                                <LogOutIcon className="text-gray-400 dark:text-gray-500" size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                    <Link
+                                        to="/login"
+                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600 rounded-full text-white font-medium text-sm shadow-md hover:shadow-lg transition-all duration-300"
+                                    >
+                                        <LogInIcon size={16} />
+                                        <span>Sign In</span>
+                                    </Link>
+                                </motion.div>
+                            )}
+
+                            {showSearch && (
+                                <SearchButton onClick={() => setSearchOpen(true)} />
+                            )}
 
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
@@ -160,19 +213,22 @@ const Header = () => {
                             >
                                 <ThemeSwitch />
                             </motion.div>
+
                         </ul>
                     </nav>
 
                     {/* Mobile Menu Controls */}
                     <div className="flex items-center gap-4 z-50 lg:hidden">
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setSearchOpen(true)}
-                            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                        >
-                            <Search size={20} />
-                        </motion.button>
+                        {showSearch && (
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setSearchOpen(true)}
+                                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                            >
+                                <Search size={20} />
+                            </motion.button>
+                        )}
 
                         <motion.div
                             whileHover={{ scale: 1.1 }}
@@ -226,11 +282,53 @@ const Header = () => {
                                 </NavLink>
                             </motion.li>
                         ))}
+
+                        {isAuthenticated ? (
+                            <motion.li
+                                variants={mobileNavItemVariants}
+                                className="mt-8 w-full flex flex-col items-center"
+                            >
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                    className="flex flex-col items-center gap-4 text-gray-800 dark:text-gray-200 w-64"
+                                >
+                                    <button
+                                        onClick={() => logout()}
+                                        className="mt-2 flex items-center justify-center gap-2 px-5 py-2 bg-white/80 dark:bg-gray-800/80 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-colors duration-150 shadow-sm w-full"
+                                    >
+                                        <span>Log out</span>
+                                        <LogOutIcon size={16} />
+                                    </button>
+                                </motion.div>
+                            </motion.li>
+                        ) : (
+                            <motion.li
+                                variants={mobileNavItemVariants}
+                                className="mt-8 w-full flex flex-col items-center"
+                            >
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                    className="w-64"
+                                >
+                                    <Link
+                                        to="/login"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600 rounded-lg text-white font-medium text-lg shadow-md hover:shadow-lg transition-all duration-300 w-full"
+                                    >
+                                        <LogInIcon size={20} />
+                                        <span>Sign In</span>
+                                    </Link>
+                                </motion.div>
+                            </motion.li>
+                        )}
                     </motion.ul>
                 </div>
             </motion.div>
 
-            <SearchModal 
+            <SearchModal
                 isOpen={searchOpen}
                 onClose={() => setSearchOpen(false)}
                 onSearch={handleSearch}

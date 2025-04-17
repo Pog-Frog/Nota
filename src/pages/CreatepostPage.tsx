@@ -242,7 +242,7 @@ const CreatePostPage = () => {
                                 value={formData.title}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base sm:text-lg transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md"
+                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base sm:text-lg transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md"
                                 placeholder="Enter title"
                             />
                         </motion.div>
@@ -257,7 +257,7 @@ const CreatePostPage = () => {
                                 value={formData.category}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md appearance-none"
+                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md appearance-none"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: "right 0.75rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}
                             >
                                 <option value="" disabled>Select category</option>
@@ -278,7 +278,7 @@ const CreatePostPage = () => {
                             value={formData.description}
                             onChange={handleChange}
                             rows={2}
-                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md"
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md"
                             placeholder="Brief description (optional)"
                         />
                     </motion.div>
@@ -327,7 +327,7 @@ const CreatePostPage = () => {
                                     value={formData.currentTag}
                                     onChange={handleChange}
                                     onKeyDown={handleTagKeyDown}
-                                    className="flex-grow px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-l-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                                    className="flex-grow px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                                     placeholder="Add tags..."
                                 />
                                 <motion.button
@@ -335,7 +335,7 @@ const CreatePostPage = () => {
                                     whileTap={{ scale: 0.97 }}
                                     type="button"
                                     onClick={addTag}
-                                    className="px-3 py-2 sm:px-4 sm:py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors shadow-sm"
+                                    className="px-3 py-2 sm:px-4 sm:py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 focus:outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition-colors shadow-sm"
                                 >
                                     Add
                                 </motion.button>
