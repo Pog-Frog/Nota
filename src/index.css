@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
-  @apply dark:bg-black
+  @apply dark:bg-black;
 }
 
 @keyframes gradient {
@@ -26,11 +26,15 @@ body {
 
 .dotted-background {
   background-image: radial-gradient(#181818 5%, #0000001f 15%);
-  
 }
 
 .dotted-background {
   background-position: 0 0, 14px 14px;
   background-size: 16px 16px;
   width: 100%;
+}
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
