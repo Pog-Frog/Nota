@@ -1,15 +1,21 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import ReactQuill from 'react-quill-new';
 import { motion } from "framer-motion";
 import 'react-quill-new/dist/quill.snow.css';
 import "./QuillStyles.css";
 import DOMPurify from 'dompurify';
+import { createBlogPost } from "../services/blogService";
+import { useAuthStore } from '../store/AuthStore'; 
+import { toast } from "react-toastify";
 
 //TODO: create edit page same as this page
 //TODO: add middleware to this page
 
 const CreatePostPage = () => {
+
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState<{
         title: string;
         category: string;
@@ -30,9 +36,19 @@ const CreatePostPage = () => {
         currentTag: ""
     });
 
+    const { user, isAuthenticated } = useAuthStore();
+
     const [previewOpen, setPreviewOpen] = useState(false);
 
     const categories = ["Learn", "Tools", "Tech", "Operations", "Inspiration", "News"];
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            toast.error("You must be logged in to create a blog post.");
+            navigate("/");
+        }
+    }
+    , [isAuthenticated, navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -106,17 +122,30 @@ const CreatePostPage = () => {
             return;
         }
 
-        const dataToSubmit = new FormData();
-        dataToSubmit.append('title', formData.title);
-        dataToSubmit.append('category', formData.category);
-        dataToSubmit.append('description', formData.description);
-        if (formData.coverImage) {
-            dataToSubmit.append('coverImage', formData.coverImage);
-        }
-        dataToSubmit.append('content', formData.content);
-        dataToSubmit.append('tags', JSON.stringify(formData.tags));
+        try {
+            
+            const blogData = {
+                title: formData.title,
+                category: formData.category,
+                description: formData.description,
+                content: formData.content,
+                tags: formData.tags,
+                authorId: user!.uid,
+                authorName: user!.displayName || undefined
+            }
+    
+            const blogPostId = await createBlogPost(blogData);
+            
+            console.log("Blog created successfully with ID:", blogPostId);
 
-        console.log("Form submitted (raw state):", formData);
+            toast.success("Blog post created successfully!"); //TODO: make the style of the toast match the design
+            
+        } catch (error) {
+            console.error("Error creating blog post:", error);
+            toast.error("Failed to create blog post. Please try again.");
+        }
+
+
     };
 
     const modules = {
