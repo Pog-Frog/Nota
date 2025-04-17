@@ -249,7 +249,7 @@ const CreatePostPage = () => {
 
             setIsLoading(false);
 
-            navigate("/"); // TODO: Redirect to the newly created blog post page 
+            navigate(`/blog/${blogPostId}`);
             
         } catch (error) {
             console.error("Error creating blog post:", error);
