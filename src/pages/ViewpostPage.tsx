@@ -1,109 +1,36 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
+import { getBlogPostById } from "../services/blogService";
+import { BlogPost } from "../interfaces/blog.interface";
+import { toast } from "react-toastify";
 
 const ViewPostPage = () => {
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
-    const [post, setPost] = useState<{
-        id: string;
-        title: string;
-        category: string;
-        description: string;
-        coverImage: string;
-        content: string;
-        tags: string[];
-        author: {
-            name: string;
-            avatar: string;
-        };
-        publishedDate: string;
-        readTime: string;
-    } | null>(null);
+    const [post, setPost] = useState<BlogPost | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const mockPost = {
-                    id: "1",
-                    title: "Understanding React's New Concurrent Mode",
-                    category: "Tech",
-                    description: "An in-depth look at how React's Concurrent Mode changes the game for web applications",
-                    coverImage: "https://placehold.co/1200x630",
-                    content: `
-                        <h2>Introduction to Concurrent Mode</h2>
-                        <p>React's Concurrent Mode is a set of new features that help React apps stay responsive and gracefully adjust to the user's device capabilities and network speed.</p>
-                        <p>In this post, we'll explore how Concurrent Mode works, why it matters, and how you can start using it in your applications.</p>
-                        <h2>Key Features</h2>
-                        <p>Some of the most important capabilities that Concurrent Mode enables:</p>
-                        <ul>
-                            <li>Interruptible rendering</li>
-                            <li>Intentional loading sequences</li>
-                            <li>Updated useTransition hook</li>
-                            <li>Better user experiences on varying devices</li>
-                        </ul>
-                        <h2>Code Example</h2>
-                        <pre><code>
-function App() {
-  const [isPending, startTransition] = useTransition();
-  const [tab, setTab] = useState('home');
-  
-  function selectTab(nextTab) {
-    startTransition(() => {
-      setTab(nextTab);
-    });
-  }
-  
-  return (
-    <>
-      <TabButton 
-        isActive={tab === 'home'}
-        onClick={() => selectTab('home')}>
-        Home
-      </TabButton>
-      <TabButton 
-        isActive={tab === 'posts'}
-        onClick={() => selectTab('posts')}>
-        Posts
-      </TabButton>
-      <TabButton 
-        isActive={tab === 'contact'}
-        onClick={() => selectTab('contact')}>
-        Contact
-      </TabButton>
-      <div>
-        {isPending && <Spinner />}
-        <TabPanel hidden={tab !== 'home'}>...</TabPanel>
-        <TabPanel hidden={tab !== 'posts'}>...</TabPanel>
-        <TabPanel hidden={tab !== 'contact'}>...</TabPanel>
-      </div>
-    </>
-  );
-}
-                        </code></pre>
-                        <h2>Conclusion</h2>
-                        <p>Concurrent Mode represents one of the most significant shifts in React's rendering model since the introduction of Fiber. By making rendering interruptible, React can deliver a more responsive user experience.</p>
-                        <p>If you're building complex applications where performance matters, investing time in understanding Concurrent Mode will pay dividends.</p>
-                    `,
-                    tags: ["React", "JavaScript", "Web Development", "Performance"],
-                    author: {
-                        name: "Jane Developer",
-                        avatar: "https://i.pravatar.cc/100?u=jane",
-                    },
-                    publishedDate: "April 12, 2025",
-                    readTime: "6 min read"
-                };
+                const response = await getBlogPostById(id!);
+                
+                if(response) {
+                    setPost(response);
+                }
 
-                setPost(mockPost);
                 setLoading(false);
             } catch (error) {
+                toast.error("Error fetching post. Please try again later.");
                 console.error("Error fetching post:", error);
                 setLoading(false);
+                navigate("/");
             }
         };
 
         fetchPost();
-    }, [id]);
+    }, [id, navigate]);
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
@@ -161,12 +88,10 @@ function App() {
                     <div className="mt-3 sm:mt-4 flex items-center">
                         <div className="flex flex-col sm:flex-row sm:items-center">
                             <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                {post.author.name}
+                                {post.authorName}
                             </p>
                             <div className="flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">
-                                <span className="sm:ml-2">{post.publishedDate}</span>
-                                <span className="mx-2 hidden sm:inline">•</span>
-                                <span>{post.readTime}</span>
+                                <span className="sm:ml-2">{post.createdAt.toDate().toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
@@ -192,7 +117,7 @@ function App() {
                     className="mb-6 sm:mb-8 rounded-lg sm:rounded-xl overflow-hidden shadow-md sm:shadow-lg"
                 >
                     <img
-                        src={post.coverImage}
+                        src={post.coverImage || "https://placehold.co/1200x630"}
                         alt={post.title}
                         className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
                     />

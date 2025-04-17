@@ -23,7 +23,7 @@ function App() {
             <Route path='*' element={<PageNotFound />} />
             <Route path='/' element={<HomePage />} />
             <Route path='/create' element={<CreatePostPage />} />
-            <Route path='/blog' element={<ViewPostPage />} />
+            <Route path='/blog/:id' element={<ViewPostPage />} />
           </Route>
           <Route element={<AuthLayout />}>
             <Route path="/register" element={<RegisterPage />} />
