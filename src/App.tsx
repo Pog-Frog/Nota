@@ -8,6 +8,8 @@ import PageNotFound from './pages/404Page';
 import RegisterPage from './pages/RegisterPage';
 import AuthLayout from './layouts/AuthLayout';
 import { ToastContainer } from 'react-toastify';
+import LoginPage from './pages/LoginPage';
+
 
 function App() {
 
@@ -25,6 +27,7 @@ function App() {
           </Route>
           <Route element={<AuthLayout />}>
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
           </Route>
         </Routes>
         <ToastContainer

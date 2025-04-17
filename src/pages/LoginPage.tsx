@@ -11,6 +11,8 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
+    //TODO: ADD yub schema for validaiton
+
     const { login, isAuthenticated, isLoading } = useAuthStore();
     
         useEffect(() => {

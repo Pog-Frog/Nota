@@ -16,6 +16,8 @@ const SignupPage = () => {
     const navigate = useNavigate();
     const { register, isAuthenticated } = useAuthStore();
 
+    //TODO: ADD yub schema for validaiton
+
     useEffect(() => {
         if (isAuthenticated) {
             navigate("/");

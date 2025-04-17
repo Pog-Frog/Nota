@@ -6,6 +6,9 @@ import 'react-quill-new/dist/quill.snow.css';
 import "./QuillStyles.css";
 import DOMPurify from 'dompurify';
 
+//TODO: create edit page same as this page
+//TODO: add middleware to this page
+
 const CreatePostPage = () => {
     const [formData, setFormData] = useState<{
         title: string;
