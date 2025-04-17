@@ -8,6 +8,7 @@ import DOMPurify from 'dompurify';
 import { createBlogPost } from "../services/blogService";
 import { useAuthStore } from '../store/AuthStore'; 
 import { toast } from "react-toastify";
+import { CLOUDINARY_UPLOAD_PRESET, CLOUDINARY_UPLOAD_URL } from "../api/config";
 
 //TODO: create edit page same as this page
 //TODO: add middleware to this page
@@ -50,6 +51,29 @@ const CreatePostPage = () => {
     }
     , [isAuthenticated, navigate]);
 
+    const [uploadStatus, setUploadStatus] = useState<{
+        isUploading: boolean;
+        progress: number;
+        error: string | null;
+    }>({
+        isUploading: false,
+        progress: 0,
+        error: null
+    });
+
+    const removeImage = () => {
+        setFormData(prev => ({ 
+            ...prev, 
+            coverImage: null, 
+            coverImagePreview: undefined
+        }));
+        setUploadStatus(prev => ({ 
+            ...prev, 
+            error: null,
+            progress: 0 
+        }));
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -62,6 +86,15 @@ const CreatePostPage = () => {
     const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+            if (!validTypes.includes(file.type)) {
+                setUploadStatus(prev => ({
+                    ...prev,
+                    error: "Please upload a valid image file (JPEG, PNG, GIF, SVG)"
+                }));
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 if (typeof reader.result === 'string') {
@@ -70,9 +103,10 @@ const CreatePostPage = () => {
                         coverImage: file,
                         coverImagePreview: reader.result as string
                     }));
+                    setUploadStatus(prev => ({ ...prev, error: null }));
                 } else {
                     console.error("FileReader result is not a string:", reader.result);
-                    setFormData(prev => ({ ...prev, coverImage: file, coverImagePreview: undefined }));
+                    setFormData(prev => ({ ...prev, coverImage: null, coverImagePreview: undefined }));
                 }
             };
             reader.onerror = (error) => {
@@ -82,6 +116,65 @@ const CreatePostPage = () => {
             reader.readAsDataURL(file);
         } else {
             setFormData(prev => ({ ...prev, coverImage: null, coverImagePreview: undefined }));
+        }
+    };
+
+    const uploadImageToCloudinary = async (file: File): Promise<string | null> => {
+        setUploadStatus(prev => ({ 
+            ...prev, 
+            isUploading: true,
+            progress: 0,
+            error: null 
+        }));
+        
+        try {
+            const formDataToUpload = new FormData();
+            formDataToUpload.append('file', file);
+            formDataToUpload.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (event) => {
+                    if (event.lengthComputable) {
+                        const progress = Math.round((event.loaded / event.total) * 100);
+                        setUploadStatus(prev => ({ ...prev, progress }));
+                    }
+                });
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            const response = JSON.parse(xhr.responseText);
+                            setUploadStatus(prev => ({
+                                ...prev,
+                                isUploading: false,
+                                progress: 100
+                            }));
+                            resolve(response.secure_url);
+                        } else {
+                            console.error('Error uploading to Cloudinary:', xhr.statusText);
+                            setUploadStatus(prev => ({
+                                ...prev,
+                                isUploading: false,
+                                error: 'Failed to upload image. Please try again.'
+                            }));
+                            reject(new Error('Upload failed'));
+                        }
+                    }
+                };
+                
+                xhr.open('POST', CLOUDINARY_UPLOAD_URL, true);
+                xhr.send(formDataToUpload);
+            });
+        } catch (error) {
+            console.error('Error uploading to Cloudinary:', error);
+            setUploadStatus(prev => ({
+                ...prev,
+                isUploading: false,
+                error: 'Failed to upload image. Please try again.'
+            }));
+            return null;
         }
     };
 
@@ -123,6 +216,17 @@ const CreatePostPage = () => {
         }
 
         try {
+
+            let cloudinaryUrl = null;
+            
+            if (formData.coverImage) {
+                cloudinaryUrl = await uploadImageToCloudinary(formData.coverImage);
+                
+                if (!cloudinaryUrl) {
+                    toast.error("Failed to upload cover image. Please try again.");
+                    return;
+                }
+            }
             
             const blogData = {
                 title: formData.title,
@@ -131,7 +235,8 @@ const CreatePostPage = () => {
                 content: formData.content,
                 tags: formData.tags,
                 authorId: user!.uid,
-                authorName: user!.displayName || undefined
+                authorName: user!.displayName || undefined,
+                coverImage: cloudinaryUrl || null,
             }
     
             const blogPostId = await createBlogPost(blogData);
@@ -139,6 +244,8 @@ const CreatePostPage = () => {
             console.log("Blog created successfully with ID:", blogPostId);
 
             toast.success("Blog post created successfully!"); //TODO: make the style of the toast match the design
+
+            navigate("/"); // TODO: Redirect to the newly created blog post page 
             
         } catch (error) {
             console.error("Error creating blog post:", error);
@@ -229,7 +336,7 @@ const CreatePostPage = () => {
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, coverImage: null, coverImagePreview: undefined }))}
+                                    onClick={removeImage}
                                     className="absolute top-2 right-2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
                                     aria-label="Remove image"
                                 >
@@ -249,7 +356,7 @@ const CreatePostPage = () => {
                                         <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                                             <span className="font-semibold">Click to upload</span>
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (max 5MB)</p>
                                     </div>
                                     <input
                                         type="file"
@@ -259,6 +366,11 @@ const CreatePostPage = () => {
                                     />
                                 </label>
                             </div>
+                        )}
+                        {uploadStatus.error && (
+                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {uploadStatus.error}
+                            </p>
                         )}
                     </motion.div>
 
