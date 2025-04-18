@@ -6,9 +6,11 @@ import 'react-quill-new/dist/quill.snow.css';
 import "./QuillStyles.css";
 import DOMPurify from 'dompurify';
 import { createBlogPost } from "../services/blogService";
-import { useAuthStore } from '../store/AuthStore'; 
+import { useAuthStore } from '../store/AuthStore';
 import { toast } from "react-toastify";
 import { CLOUDINARY_UPLOAD_PRESET, CLOUDINARY_UPLOAD_URL } from "../api/config";
+import { Category } from "../interfaces/category.interface";
+import { getAllCategories } from "../services/categoryService";
 
 //TODO: create edit page same as this page
 //TODO: add middleware to this page
@@ -19,7 +21,8 @@ const CreatePostPage = () => {
 
     const [formData, setFormData] = useState<{
         title: string;
-        category: string;
+        categoryId: string;
+        categoryName: string;
         description: string;
         coverImage: File | null;
         coverImagePreview: string | undefined;
@@ -28,7 +31,8 @@ const CreatePostPage = () => {
         currentTag: string;
     }>({
         title: "",
-        category: "",
+        categoryId: "",
+        categoryName: "",
         description: "",
         coverImage: null,
         coverImagePreview: undefined,
@@ -41,8 +45,7 @@ const CreatePostPage = () => {
 
     const [previewOpen, setPreviewOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
-    const categories = ["Learn", "Tools", "Tech", "Operations", "Inspiration", "News"];
+    const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -50,7 +53,21 @@ const CreatePostPage = () => {
             navigate("/");
         }
     }
-    , [isAuthenticated, navigate]);
+        , [isAuthenticated, navigate]);
+
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const response = await getAllCategories();
+            if (response) {
+                setCategories(response);
+            } else {
+                toast.error("An error occurred please try again later.");
+            }
+        }
+
+        fetchCategories();
+    }, []);
 
     const [uploadStatus, setUploadStatus] = useState<{
         isUploading: boolean;
@@ -63,20 +80,31 @@ const CreatePostPage = () => {
     });
 
     const removeImage = () => {
-        setFormData(prev => ({ 
-            ...prev, 
-            coverImage: null, 
+        setFormData(prev => ({
+            ...prev,
+            coverImage: null,
             coverImagePreview: undefined
         }));
-        setUploadStatus(prev => ({ 
-            ...prev, 
+        setUploadStatus(prev => ({
+            ...prev,
             error: null,
-            progress: 0 
+            progress: 0
         }));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        if (name === "category") {
+            const selectedCategory = categories.find(category => category.id === value);
+            setFormData(prev => ({
+                ...prev,
+                categoryId: value,
+                categoryName: selectedCategory ? selectedCategory.name : ""
+            }));
+            console.log("Selected category:", selectedCategory);
+            
+            return;
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -213,26 +241,27 @@ const CreatePostPage = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        if (!formData.title || !formData.category || !formData.content) { //TODO: add proper validation
+        if (!formData.title || !formData.categoryName || !formData.content) { //TODO: add proper validation
             return;
         }
 
         try {
 
             let cloudinaryUrl = null;
-            
+
             if (formData.coverImage) {
                 cloudinaryUrl = await uploadImageToCloudinary(formData.coverImage);
-                
+
                 if (!cloudinaryUrl) {
                     toast.error("Failed to upload cover image. Please try again.");
                     return;
                 }
             }
-            
+
             const blogData = {
                 title: formData.title,
-                category: formData.category,
+                categoryId: formData.categoryId,
+                categoryName: formData.categoryName,
                 description: formData.description,
                 content: formData.content,
                 tags: formData.tags,
@@ -240,9 +269,9 @@ const CreatePostPage = () => {
                 authorName: user!.displayName || undefined,
                 coverImage: cloudinaryUrl || null,
             }
-    
+
             const blogPostId = await createBlogPost(blogData);
-            
+
             console.log("Blog created successfully with ID:", blogPostId);
 
             toast.success("Blog post created successfully!"); //TODO: make the style of the toast match the design
@@ -250,7 +279,7 @@ const CreatePostPage = () => {
             setIsLoading(false);
 
             navigate(`/blog/${blogPostId}`);
-            
+
         } catch (error) {
             console.error("Error creating blog post:", error);
             toast.error("Failed to create blog post. Please try again.");
@@ -402,7 +431,7 @@ const CreatePostPage = () => {
                             <select
                                 id="category"
                                 name="category"
-                                value={formData.category}
+                                value={formData.categoryId}
                                 onChange={handleChange}
                                 required
                                 className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md appearance-none"
@@ -410,7 +439,7 @@ const CreatePostPage = () => {
                             >
                                 <option value="" disabled>Select category</option>
                                 {categories.map((category) => (
-                                    <option key={category} value={category}>{category}</option>
+                                    <option key={category.id} value={category.id}>{category.name}</option>
                                 ))}
                             </select>
                         </motion.div>
@@ -568,9 +597,9 @@ const CreatePostPage = () => {
                                     {formData.title || "Your Post Title"}
                                 </h1>
 
-                                {formData.category && (
+                                {formData.categoryName && (
                                     <span className="inline-block bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mr-2 mb-3 sm:mb-4 shadow-sm">
-                                        {formData.category}
+                                        {formData.categoryName}
                                     </span>
                                 )}
 

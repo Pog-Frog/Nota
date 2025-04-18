@@ -17,6 +17,14 @@ export const createBlogPost = async (blogData: Omit<Blog, 'createdAt' | 'updated
         throw new Error("Author ID is missing. User must be logged in to create a post.");
     }
 
+    if (!blogData.categoryId) {
+        throw new Error("Category ID is missing. A category must be selected.");
+    }
+
+    if (!blogData.categoryName) {
+        throw new Error("Category Name is missing, but proceeding with Category ID.");
+    }
+
     try {
         const blogWithTimestamp = {
             ...blogData,

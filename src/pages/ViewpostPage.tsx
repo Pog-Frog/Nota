@@ -77,7 +77,7 @@ const ViewPostPage = () => {
                 >
                     <div className="mb-3">
                         <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 shadow-sm">
-                            {post.category}
+                            {post.categoryName}
                         </span>
                     </div>
 
@@ -185,6 +185,7 @@ const ViewPostPage = () => {
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Related Posts</h2>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         {/* Related Post Block */}
+                        {/* TODO: bring the 1st 2 posts of the same category that aren't that post and display them here */}
                         <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                             <div className="h-36 sm:h-48 overflow-hidden">
                                 <img
