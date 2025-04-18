@@ -1,9 +1,13 @@
 import { Link } from "react-router";
+import { useAuthStore } from "../store/AuthStore";
 
 const HeroSection = () => {
+
+    const {isAuthenticated } = useAuthStore();
+
     return (
         <div className="mx-auto max-w-4xl text-center mb-16">
-            <Link to="/">
+            <Link to={isAuthenticated ? "/" : "/register"}>
                 <button className="relative overflow-hidden rounded-md text-white px-4 py-2 hover:cursor-pointer">
                     <div className="group relative mx-auto flex items-center justify-center gap-2 rounded-2xl dark:bg-black/40 px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#8fdfff1f] backdrop-blur-sm transition-shadow duration-500 ease-out hover:shadow-[inset_0_-5px_10px_#8fdfff3f]">
 
