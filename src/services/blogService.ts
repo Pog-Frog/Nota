@@ -66,7 +66,7 @@ export const getAllBlogPosts = async (options: QueryOptions = {}): Promise<BlogP
         const constraints = [];
 
         if (categoryFilter) {
-            constraints.push(where("category", "==", categoryFilter));
+            constraints.push(where("categoryId", "==", categoryFilter));
         }
 
         constraints.push(orderBy(orderByField, orderDirection));
@@ -139,3 +139,4 @@ export const getBlogPostsByTag = async (tag: string): Promise<BlogPost[]> => {
         throw error;
     }
 };
+
