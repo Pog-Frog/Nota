@@ -1,1 +1,0 @@
-export type Category = "Learn" | "Tools" | "Tech" | "Operations" | "Inspiration" | "News";
