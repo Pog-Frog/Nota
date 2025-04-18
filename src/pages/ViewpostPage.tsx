@@ -12,6 +12,8 @@ const ViewPostPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+        
         const fetchPost = async () => {
             try {
                 const response = await getBlogPostById(id!);

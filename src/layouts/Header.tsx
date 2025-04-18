@@ -21,8 +21,8 @@ const Header: React.FC<HeaderProps> = ({ showSearch = true }) => {
             link: "/"
         },
         {
-            text: "Blogs",
-            link: "/blogs"
+            text: "Write",
+            link: "/create"
         }
     ];
 
