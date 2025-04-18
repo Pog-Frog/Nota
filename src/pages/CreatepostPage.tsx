@@ -50,7 +50,7 @@ const CreatePostPage = () => {
     useEffect(() => {
         if (!isAuthenticated) {
             toast.error("You must be logged in to create a blog post.");
-            navigate("/");
+            navigate("/login");
         }
     }
         , [isAuthenticated, navigate]);
