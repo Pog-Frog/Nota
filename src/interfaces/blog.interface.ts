@@ -2,7 +2,8 @@ import { Timestamp } from "firebase/firestore";
 
 export interface Blog {
     title: string;
-    category: string;
+    categoryId: string; 
+    categoryName: string; 
     description?: string;
     content: string;
     tags: string[];
