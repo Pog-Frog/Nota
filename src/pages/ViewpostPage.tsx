@@ -224,7 +224,7 @@ const ViewPostPage = () => {
                     }
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         {
-                            similarPosts.length > 0 && similarPosts.map((post) => (
+                            similarPosts.length > 0 && similarPosts.slice(0, 2).map((post) => (
                                 <BlogCard key={post.id} blog={post} />
                             ))
                         }
