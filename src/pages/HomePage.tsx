@@ -19,9 +19,7 @@ const HomePage = () => {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [blogs, setBlogs] = useState<BlogPost[]>([]);
     const [hasMore, setHasMore] = useState(true);
-    const [lastDoc, setLastDoc] = useState<BlogPost | null>(null);
     const postsPerPage = 6;
-    const loadedBlogIds = useRef(new Set<string>());
     const navigate = useNavigate();
 
     const [lastVisibleDoc, setLastVisibleDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
@@ -32,9 +30,10 @@ const HomePage = () => {
     const fetchInitialBlogs = useCallback(async (categoryId: string | null = null) => {
         setIsLoadingBlogs(true);
         setErrorBlogs(null);
-        setBlogs([]); 
-        setLastVisibleDoc(null); 
-        setHasMore(true); 
+        setBlogs([]);
+        setLastVisibleDoc(null);
+        setHasMore(true);
+
         try {
             const { blogs: fetchedBlogs, lastVisibleDoc: newLastVisible } = await getAllBlogPosts({
                 orderByField: "createdAt",
@@ -64,9 +63,9 @@ const HomePage = () => {
                 console.log("fetchMoreBlogs called but no lastVisibleDoc, likely end of data.");
                 setHasMore(false);
             }
-             if(!hasMore) {
-                 console.log("fetchMoreBlogs called but hasMore is false.");
-             }
+            if (!hasMore) {
+                console.log("fetchMoreBlogs called but hasMore is false.");
+            }
             return;
         }
 
@@ -78,7 +77,7 @@ const HomePage = () => {
                 orderByField: "createdAt",
                 orderDirection: "desc",
                 limit: postsPerPage,
-                categoryFilter: selectedCategory?.id ?? undefined, 
+                categoryFilter: selectedCategory?.id ?? undefined,
             });
 
             setBlogs(prevBlogs => [...prevBlogs, ...fetchedBlogs]);
@@ -88,13 +87,13 @@ const HomePage = () => {
             console.log("More blogs fetched:", fetchedBlogs.length, "Has More:", fetchedBlogs.length === postsPerPage && newLastVisible !== null);
         } catch (error) {
             console.error("Error fetching more posts:", error);
-            setErrorBlogs("Failed to load more posts."); 
-            setHasMore(false); 
+            setErrorBlogs("Failed to load more posts.");
+            setHasMore(false);
         } finally {
-            setIsLoadingBlogs(false); 
+            setIsLoadingBlogs(false);
         }
 
-    }, [isLoadingBlogs, hasMore, lastVisibleDoc, postsPerPage, selectedCategory]); 
+    }, [isLoadingBlogs, hasMore, lastVisibleDoc, postsPerPage, selectedCategory]);
 
     const fetchCategories = useCallback(async () => {
         setIsLoadingCategories(true);
@@ -116,23 +115,23 @@ const HomePage = () => {
     useEffect(() => {
         console.log("Selected category changed, fetching initial blogs for:", selectedCategory?.id);
         fetchInitialBlogs(selectedCategory?.id);
-    }, [fetchInitialBlogs, selectedCategory]); 
+    }, [fetchInitialBlogs, selectedCategory]);
 
 
     const handleCategoryFilterClick = (categoryId: string | null) => {
         if (categoryId !== selectedCategory?.id) {
-             console.log("Setting selected category ID:", categoryId);
+            console.log("Setting selected category ID:", categoryId);
             setSelectedCategory(selectedCategory);
         }
     };
 
     const handleNavigateToCategory = (category: Category) => {
         handleCategoryFilterClick(category.id);
-        navigate('/#recent-blogs'); 
+        navigate('/#recent-blogs');
         setTimeout(() => {
-             const element = document.getElementById('recent-blogs');
-             element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100); 
+            const element = document.getElementById('recent-blogs');
+            element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
     }
 
     return (
@@ -153,7 +152,7 @@ const HomePage = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {categories.slice(0, 3).map((category) => (
+                        {/* {categories.slice(0, 3).map((category) => (
                             <button key={category.id} className="relative rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-[1.02] group"
                                 onClick={() => handleNavigateToCategory(category)}
                             >
@@ -171,65 +170,131 @@ const HomePage = () => {
                                     </div>
                                 </div>
                             </button>
-                        ))}
-                    </div>
-                </div>
+                        ))} */}
 
-                <div className="mt-16 py-8" id="recent-blogs">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white relative inline-block">
-                                Recent Blogs
-                                <span className="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></span>
-                            </h2>
-                            <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-lg">
-                                Your daily dose of diverse thinking. What topic shall we explore together?
-                            </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2 py-2 w-full lg:w-auto overflow-x-auto lg:overflow-visible scrollbar-hide">
-                            <div className="flex gap-2 pb-1">
-                                <button
-                                    className={`px-4 py-2 h-auto min-w-fit whitespace-nowrap bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold transform hover:scale-105 transition-all duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50 ${selectedCategory === null ? "bg-slate-300 dark:bg-slate-50/30" : ""
-                                        }`}
-                                    onClick={() => setSelectedCategory(null)}
-                                >
-                                    All
-                                </button>
-                                {categories.slice(0, 5).map((category) => (
-                                    <button key={category.id}
-                                        className={`px-4 py-2 h-auto min-w-fit whitespace-nowrap bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold transform hover:scale-105 transition-all duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50 ${selectedCategory?.id === category.id ? "bg-slate-300 dark:bg-slate-50/30" : ""
-                                            }`}
-                                        onClick={() => setSelectedCategory(category)}
+                        {isLoadingCategories ? (
+                            Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-2xl shadow-lg h-36"></div>
+                            ))
+                        ) : (
+                            <>
+                                {categories.slice(0, 3).map((category) => (
+                                    <button key={category.id} className="relative rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-[1.02] group"
+                                        onClick={() => handleNavigateToCategory(category)}
                                     >
-                                        {category.name}
+                                        <img
+                                            className="w-full h-36 object-cover transition-transform duration-500 group-hover:scale-110"
+                                            src={category.image}
+                                            alt={category.name}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div className="absolute bottom-4 left-4">
+                                            <div className="bg-white dark:bg-gray-800 rounded-full px-4 py-2 shadow-md">
+                                                <span className="text-gray-900 dark:text-gray-100 text-sm font-semibold">
+                                                    {category.name}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </button>
                                 ))}
-                            </div>
-                        </div>
+                            </>
+
+                        )}
                     </div>
 
-                    <InfiniteScroll
-                        dataLength={blogs.length}
-                        next={fetchMoreBlogs}
-                        hasMore={hasMore}
-                        loader={
-                            <div className="flex justify-center my-6">
-                                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                    <div className="mt-16 py-8" id="recent-blogs">
+                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
+                            <div>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white relative inline-block">
+                                    Recent Blogs
+                                    <span className="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></span>
+                                </h2>
+                                <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-lg">
+                                    Your daily dose of diverse thinking. What topic shall we explore together?
+                                </p>
                             </div>
-                        }
-                        endMessage={
-                            <div className="text-center mt-6 text-gray-500 dark:text-gray-400">
-                                <p>You've seen all the articles</p>
+
+                            <div className="flex flex-wrap gap-2 py-2 w-full lg:w-auto overflow-x-auto lg:overflow-visible scrollbar-hide">
+                                <div className="flex gap-2 pb-1">
+                                    <button
+                                        className={`px-4 py-2 h-auto min-w-fit whitespace-nowrap bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold transform hover:scale-105 transition-all duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50 ${selectedCategory === null ? "bg-slate-300 dark:bg-slate-50/30" : ""
+                                            }`}
+                                        onClick={() => setSelectedCategory(null)}
+                                    >
+                                        All
+                                    </button>
+                                    {categories.slice(0, 5).map((category) => (
+                                        <button key={category.id}
+                                            className={`px-4 py-2 h-auto min-w-fit whitespace-nowrap bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold transform hover:scale-105 transition-all duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50 ${selectedCategory?.id === category.id ? "bg-slate-300 dark:bg-slate-50/30" : ""
+                                                }`}
+                                            onClick={() => setSelectedCategory(category)}
+                                        >
+                                            {category.name}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        }
-                    >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 overflow-hidden">
-                            {blogs.map((blog) => (
-                                <BlogCard key={blog.id} blog={blog} />
-                            ))}
                         </div>
-                    </InfiniteScroll>
+
+                        {isLoadingBlogs && blogs.length === 0 && !errorBlogs && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                                {Array.from({ length: postsPerPage }).map((_, index) => (
+                                    <div key={index} className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md h-96">...</div>
+                                ))}
+                            </div>
+                        )}
+
+                        {!isLoadingBlogs && blogs.length === 0 && !errorBlogs && (
+                            <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+                                <p>No blog posts found{selectedCategory?.name ? ` for this category` : ""}.</p>
+                            </div>
+                        )}
+
+                        {/* <InfiniteScroll
+                            dataLength={blogs.length}
+                            next={fetchMoreBlogs}
+                            hasMore={hasMore}
+                            loader={
+                                <div className="flex justify-center my-6">
+                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                                </div>
+                            }
+                            endMessage={
+                                <div className="text-center mt-6 text-gray-500 dark:text-gray-400">
+                                    <p>You've seen all the articles</p>
+                                </div>
+                            }
+                        >
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 overflow-hidden">
+                                {blogs.map((blog) => (
+                                    <BlogCard key={blog.id} blog={blog} />
+                                ))}
+                            </div>
+                        </InfiniteScroll> */}
+                        {blogs.length > 0 && !errorBlogs && (
+                            <InfiniteScroll
+                                dataLength={blogs.length}
+                                next={fetchMoreBlogs}
+                                hasMore={hasMore}
+                                loader={
+                                    <div className="flex justify-center my-6">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                                    </div>
+                                }
+                                endMessage={
+                                    <div className="text-center mt-6 text-gray-500 dark:text-gray-400">
+                                        <p>You've seen all the articles</p>
+                                    </div>
+                                }
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 overflow-hidden">
+                                    {blogs.map((blog) => (
+                                        <BlogCard key={blog.id} blog={blog} />
+                                    ))}
+                                </div>
+                            </InfiniteScroll>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
