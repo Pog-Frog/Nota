@@ -10,7 +10,6 @@ import { Category } from "../interfaces/category.interface";
 import { getAllCategories } from "../services/categoryService";
 import { BlogPost } from "../interfaces/blog.interface";
 import { getAllBlogPosts, getMoreBlogPosts } from "../services/blogService";
-import { useNavigate } from "react-router";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
@@ -20,7 +19,6 @@ const HomePage = () => {
     const [blogs, setBlogs] = useState<BlogPost[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const postsPerPage = 6;
-    const navigate = useNavigate();
 
     const [lastVisibleDoc, setLastVisibleDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
     const [isLoadingBlogs, setIsLoadingBlogs] = useState(true);
@@ -46,10 +44,10 @@ const HomePage = () => {
             setLastVisibleDoc(newLastVisible);
             setHasMore(fetchedBlogs.length === postsPerPage && newLastVisible !== null);
 
-            console.log("Initial blogs fetched:", fetchedBlogs.length, "Has More:", fetchedBlogs.length === postsPerPage && newLastVisible !== null);
+            console.log("inti blogs fetched:", fetchedBlogs.length, "has more:", fetchedBlogs.length === postsPerPage && newLastVisible !== null);
         } catch (error) {
             console.error("Error fetching initial posts:", error);
-            setErrorBlogs("Failed to load blog posts.");
+            setErrorBlogs("faled to load blog posts");
             setHasMore(false);
             setBlogs([]);
         } finally {
@@ -60,16 +58,15 @@ const HomePage = () => {
     const fetchMoreBlogs = useCallback(async () => {
         if (isLoadingBlogs || !hasMore || !lastVisibleDoc) {
             if (!lastVisibleDoc && hasMore) {
-                console.log("fetchMoreBlogs called but no lastVisibleDoc, likely end of data.");
+                console.log("end of data");
                 setHasMore(false);
             }
             if (!hasMore) {
-                console.log("fetchMoreBlogs called but hasMore is false.");
+                console.log("fetchMoreBlogs called but hasMore is false");
             }
             return;
         }
 
-        console.log("Fetching more blogs after:", lastVisibleDoc.id);
         setIsLoadingBlogs(true);
 
         try {
@@ -87,7 +84,7 @@ const HomePage = () => {
             console.log("More blogs fetched:", fetchedBlogs.length, "Has More:", fetchedBlogs.length === postsPerPage && newLastVisible !== null);
         } catch (error) {
             console.error("Error fetching more posts:", error);
-            setErrorBlogs("Failed to load more posts.");
+            setErrorBlogs("failed to load more posts");
             setHasMore(false);
         } finally {
             setIsLoadingBlogs(false);
@@ -113,21 +110,19 @@ const HomePage = () => {
     }, [fetchCategories]);
 
     useEffect(() => {
-        console.log("Selected category changed, fetching initial blogs for:", selectedCategory?.id);
+        console.log("Selected category changed:", selectedCategory?.id);
         fetchInitialBlogs(selectedCategory?.id);
     }, [fetchInitialBlogs, selectedCategory]);
 
 
-    const handleCategoryFilterClick = (categoryId: string | null) => {
-        if (categoryId !== selectedCategory?.id) {
-            console.log("Setting selected category ID:", categoryId);
-            setSelectedCategory(selectedCategory);
+    const handleCategoryFilterClick = (category: Category | null) => {
+        if (category?.id !== selectedCategory?.id || category === null && selectedCategory !== null) {
+            setSelectedCategory(category);
         }
     };
 
     const handleNavigateToCategory = (category: Category) => {
-        handleCategoryFilterClick(category.id);
-        navigate('/#recent-blogs');
+        handleCategoryFilterClick(category);
         setTimeout(() => {
             const element = document.getElementById('recent-blogs');
             element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -151,7 +146,7 @@ const HomePage = () => {
                         </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="recent-blogs">
                         {/* {categories.slice(0, 3).map((category) => (
                             <button key={category.id} className="relative rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-[1.02] group"
                                 onClick={() => handleNavigateToCategory(category)}
@@ -179,7 +174,7 @@ const HomePage = () => {
                         ) : (
                             <>
                                 {categories.slice(0, 3).map((category) => (
-                                    <button key={category.id} className="relative rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-[1.02] group"
+                                    <button key={category.id} className="relative rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-[1.02] group hover:cursor-pointer"
                                         onClick={() => handleNavigateToCategory(category)}
                                     >
                                         <img
@@ -202,7 +197,7 @@ const HomePage = () => {
                         )}
                     </div>
 
-                    <div className="mt-16 py-8" id="recent-blogs">
+                    <div className="mt-16 py-8">
                         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
                             <div>
                                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white relative inline-block">
