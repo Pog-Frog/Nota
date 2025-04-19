@@ -17,7 +17,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
         <Link to={`/blog/${blog.id}`} className="flex flex-col rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-white dark:bg-black border border-gray-200/30 dark:border-gray-700/30 h-full group">
             <div className="relative w-full h-56 overflow-hidden hover:cursor-pointer">
                 <img
-                    className="w-[392px] h-[220px] object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-fit h-fit object-cover transition-transform duration-500 group-hover:scale-105"
                     src={blog.coverImage || "https://placehold.co/392x220"}
                     alt="Blog post thumbnail"
                 />
