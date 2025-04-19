@@ -17,41 +17,56 @@ const ViewPostPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        let isMounted = true;
 
-        const fetchPost = async () => {
+        const fetchPostAndSimilar = async () => {
+            setLoading(true);
             try {
-                const response = await getBlogPostById(id!);
+                const fetchedPost = await getBlogPostById(id!);
+                if (!isMounted) return;
 
-                if (response) {
-                    setPost(response);
+                if (fetchedPost) {
+                    setPost(fetchedPost);
+                    try {
+                        const { blogs } = await getAllBlogPosts({
+                            categoryFilter: fetchedPost.categoryId,
+                            limit: 3,
+                            orderByField: "createdAt",
+                            orderDirection: "desc"
+                        });
+                        if (isMounted) {
+                            setSimilarPosts(blogs.filter((p) => p.id !== id));
+                        }
+                    } catch (similarError) {
+                        console.error("Error fetching similar posts:", similarError);
+                        if (isMounted) setSimilarPosts([]);
+                    }
                 }
 
-                setLoading(false);
             } catch (error) {
-                toast.error("Error fetching post. Please try again later.");
                 console.error("Error fetching post:", error);
-                setLoading(false);
-                navigate("/");
+                if (isMounted) {
+                    toast.error("Something went wrong .");
+                    setPost(null);
+                    navigate("/");
+                }
+            } finally {
+                if (isMounted) setLoading(false);
             }
         };
 
-        const fetchSimilarPosts = async () => {
-            try {
-                const { blogs } = await getAllBlogPosts({
-                    categoryFilter: post?.categoryId,
-                    limit: 3,
-                    orderByField: "createdAt",
-                    orderDirection: "desc"
-                });
-                setSimilarPosts(blogs.filter((p) => p.id !== id));
-            } catch (error) {
-                console.error("Error fetching similar posts:", error);
-            }
+        if (id) {
+            fetchPostAndSimilar();
+        } else {
+            setLoading(false);
+            navigate("/404");
         }
 
-        fetchPost();
-        fetchSimilarPosts();
-    }, [id, navigate, post?.categoryId]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [id, navigate]);
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
@@ -71,14 +86,9 @@ const ViewPostPage = () => {
     }
 
     if (!post) {
-        return (
-            <div className="w-full min-h-screen flex flex-col items-center justify-center px-4">
-                <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">Post not found</h2>
-                <Link to="/" className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
-                    Return to home
-                </Link>
-            </div>
-        );
+        toast.error("Post not found.");
+        navigate("/");
+        return null;
     }
 
     return (
