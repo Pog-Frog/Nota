@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import BlogCard from "../components/BlogCard";
 import CategoryCard from "../components/CategoryCard";
 import CategorySection from "../components/CategorySection";
@@ -9,57 +9,131 @@ import Divider from "../components/ui/Divider";
 import { Category } from "../interfaces/category.interface";
 import { getAllCategories } from "../services/categoryService";
 import { BlogPost } from "../interfaces/blog.interface";
-import { getAllBlogPosts } from "../services/blogService";
+import { getAllBlogPosts, getMoreBlogPosts } from "../services/blogService";
 import { useNavigate } from "react-router";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 const HomePage = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [blogs, setBlogs] = useState<BlogPost[]>([]);
+    const [hasMore, setHasMore] = useState(true);
+    const [lastDoc, setLastDoc] = useState<BlogPost | null>(null);
+    const postsPerPage = 6;
+    const loadedBlogIds = useRef(new Set<string>());
     const navigate = useNavigate();
 
-    const fetchBlogs = async (categoryId: string | null = null) => {
-        try {
-            const fetchBlogs = await getAllBlogPosts({ orderByField: "createdAt", orderDirection: "desc", limit: 6, categoryFilter: categoryId as string });
-            setBlogs(fetchBlogs);
-            console.log("Blogs fetched:", fetchBlogs);
-        } catch (error) {
-            console.error("Error fetching posts:", error);
-        }
-    };
+    const [lastVisibleDoc, setLastVisibleDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+    const [isLoadingBlogs, setIsLoadingBlogs] = useState(true);
+    const [errorBlogs, setErrorBlogs] = useState<string | null>(null);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-    const fetchCategories = async () => {
+    const fetchInitialBlogs = useCallback(async (categoryId: string | null = null) => {
+        setIsLoadingBlogs(true);
+        setErrorBlogs(null);
+        setBlogs([]); 
+        setLastVisibleDoc(null); 
+        setHasMore(true); 
+        try {
+            const { blogs: fetchedBlogs, lastVisibleDoc: newLastVisible } = await getAllBlogPosts({
+                orderByField: "createdAt",
+                orderDirection: "desc",
+                limit: postsPerPage,
+                categoryFilter: categoryId ?? undefined,
+            });
+
+            setBlogs(fetchedBlogs);
+            setLastVisibleDoc(newLastVisible);
+            setHasMore(fetchedBlogs.length === postsPerPage && newLastVisible !== null);
+
+            console.log("Initial blogs fetched:", fetchedBlogs.length, "Has More:", fetchedBlogs.length === postsPerPage && newLastVisible !== null);
+        } catch (error) {
+            console.error("Error fetching initial posts:", error);
+            setErrorBlogs("Failed to load blog posts.");
+            setHasMore(false);
+            setBlogs([]);
+        } finally {
+            setIsLoadingBlogs(false);
+        }
+    }, [postsPerPage]);
+
+    const fetchMoreBlogs = useCallback(async () => {
+        if (isLoadingBlogs || !hasMore || !lastVisibleDoc) {
+            if (!lastVisibleDoc && hasMore) {
+                console.log("fetchMoreBlogs called but no lastVisibleDoc, likely end of data.");
+                setHasMore(false);
+            }
+             if(!hasMore) {
+                 console.log("fetchMoreBlogs called but hasMore is false.");
+             }
+            return;
+        }
+
+        console.log("Fetching more blogs after:", lastVisibleDoc.id);
+        setIsLoadingBlogs(true);
+
+        try {
+            const { blogs: fetchedBlogs, lastVisibleDoc: newLastVisible } = await getMoreBlogPosts(lastVisibleDoc, {
+                orderByField: "createdAt",
+                orderDirection: "desc",
+                limit: postsPerPage,
+                categoryFilter: selectedCategory?.id ?? undefined, 
+            });
+
+            setBlogs(prevBlogs => [...prevBlogs, ...fetchedBlogs]);
+            setLastVisibleDoc(newLastVisible);
+            setHasMore(fetchedBlogs.length === postsPerPage && newLastVisible !== null);
+
+            console.log("More blogs fetched:", fetchedBlogs.length, "Has More:", fetchedBlogs.length === postsPerPage && newLastVisible !== null);
+        } catch (error) {
+            console.error("Error fetching more posts:", error);
+            setErrorBlogs("Failed to load more posts."); 
+            setHasMore(false); 
+        } finally {
+            setIsLoadingBlogs(false); 
+        }
+
+    }, [isLoadingBlogs, hasMore, lastVisibleDoc, postsPerPage, selectedCategory]); 
+
+    const fetchCategories = useCallback(async () => {
+        setIsLoadingCategories(true);
         try {
             const response = await getAllCategories();
             setCategories(response);
         } catch (error) {
             console.error("Error fetching categories:", error);
+        } finally {
+            setIsLoadingCategories(false);
         }
-    };
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
-
-        fetchCategories();
     }, []);
 
     useEffect(() => {
-        if (selectedCategory) {
-            fetchBlogs(selectedCategory.id);
-        } else {
-            fetchBlogs();
+        window.scrollTo(0, 0);
+        fetchCategories();
+    }, [fetchCategories]);
+
+    useEffect(() => {
+        console.log("Selected category changed, fetching initial blogs for:", selectedCategory?.id);
+        fetchInitialBlogs(selectedCategory?.id);
+    }, [fetchInitialBlogs, selectedCategory]); 
+
+
+    const handleCategoryFilterClick = (categoryId: string | null) => {
+        if (categoryId !== selectedCategory?.id) {
+             console.log("Setting selected category ID:", categoryId);
+            setSelectedCategory(selectedCategory);
         }
-    }, [selectedCategory]);
+    };
 
     const handleNavigateToCategory = (category: Category) => {
-        setSelectedCategory(category);
-        navigate('/#recent-blogs');
-        const element = document.getElementById('recent-blogs');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
+        handleCategoryFilterClick(category.id);
+        navigate('/#recent-blogs'); 
+        setTimeout(() => {
+             const element = document.getElementById('recent-blogs');
+             element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100); 
     }
-
 
     return (
         <div className="w-full relative overflow-hidden">
@@ -123,12 +197,6 @@ const HomePage = () => {
                                     All
                                 </button>
                                 {categories.slice(0, 5).map((category) => (
-                                    // <FilterButton
-                                    //     key={category.id}
-                                    //     label={category.name}
-                                    //     onClick={() => { }}
-                                    //     isActive={index === 0}
-                                    // />
                                     <button key={category.id}
                                         className={`px-4 py-2 h-auto min-w-fit whitespace-nowrap bg-slate-200/30 dark:bg-slate-50/10 rounded-full text-gray-800 dark:text-white text-sm font-semibold transform hover:scale-105 transition-all duration-200 ease-in-out hover:cursor-pointer hover:dark:bg-slate-50/20 hover:bg-slate-200/50 ${selectedCategory?.id === category.id ? "bg-slate-300 dark:bg-slate-50/30" : ""
                                             }`}
@@ -141,18 +209,27 @@ const HomePage = () => {
                         </div>
                     </div>
 
-                    {/* TODO: Add articles here */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                        {blogs.map((blog) => (
-                            <BlogCard key={blog.id} blog={blog} />
-                        ))}
-                    </div>
-
-                    <div className="flex justify-center mt-12">
-                        <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:cursor-pointer">
-                            Load More Articles
-                        </button>
-                    </div>
+                    <InfiniteScroll
+                        dataLength={blogs.length}
+                        next={fetchMoreBlogs}
+                        hasMore={hasMore}
+                        loader={
+                            <div className="flex justify-center my-6">
+                                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                            </div>
+                        }
+                        endMessage={
+                            <div className="text-center mt-6 text-gray-500 dark:text-gray-400">
+                                <p>You've seen all the articles</p>
+                            </div>
+                        }
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 overflow-hidden">
+                            {blogs.map((blog) => (
+                                <BlogCard key={blog.id} blog={blog} />
+                            ))}
+                        </div>
+                    </InfiniteScroll>
                 </div>
             </div>
         </div>

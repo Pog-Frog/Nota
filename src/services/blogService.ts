@@ -1,4 +1,6 @@
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp, startAfter,
+    QueryDocumentSnapshot,
+    DocumentData  } from "firebase/firestore";
 import { db } from "../api/firebase";
 import { Blog, BlogPost } from "../interfaces/blog.interface";
 
@@ -9,6 +11,11 @@ interface QueryOptions {
     limit?: number;
     orderByField?: string;
     orderDirection?: "asc" | "desc";
+}
+
+interface PaginatedBlogResponse {
+    blogs: BlogPost[];
+    lastVisibleDoc: QueryDocumentSnapshot<DocumentData> | null;
 }
 
 
@@ -59,7 +66,7 @@ export const getBlogPostById = async (id: string): Promise<BlogPost | null> => {
     }
 };
 
-export const getAllBlogPosts = async (options: QueryOptions = {}): Promise<BlogPost[]> => {
+export const getAllBlogPosts = async (options: QueryOptions = {}):  Promise<PaginatedBlogResponse> => {
     try {
         const { categoryFilter, limit: queryLimit = 50, orderByField = "createdAt", orderDirection = "desc" } = options;
 
@@ -81,7 +88,12 @@ export const getAllBlogPosts = async (options: QueryOptions = {}): Promise<BlogP
             blogs.push({ id: doc.id, ...doc.data() } as BlogPost);
         });
 
-        return blogs;
+        const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+        return {
+            blogs: blogs,
+            lastVisibleDoc: lastVisible || null, 
+        }
     } catch (error) {
         console.error("Error getting blog posts:", error);
         throw error;
@@ -89,7 +101,7 @@ export const getAllBlogPosts = async (options: QueryOptions = {}): Promise<BlogP
 };
 
 export const updateBlogPost = async (id: string, blogData: Partial<Omit<Blog, 'id' | 'authorId' | 'createdAt'>>): Promise<void> => {
-    // **Note:** Rules should prevent changing authorId and createdAt
+    // **Note: ** Cannot change authorId and createdAt :(
     try {
         const docRef = doc(db, COLLECTION_NAME, id);
 
@@ -140,3 +152,44 @@ export const getBlogPostsByTag = async (tag: string): Promise<BlogPost[]> => {
     }
 };
 
+export const getMoreBlogPosts = async (
+    lastVisible: QueryDocumentSnapshot<DocumentData> | null,
+    options: QueryOptions = {}
+): Promise<PaginatedBlogResponse> => {
+    if (!lastVisible) {
+        console.log("No lastVisible document provided to getMoreBlogPosts, returning empty.");
+        return { blogs: [], lastVisibleDoc: null };
+    }
+
+    try {
+        const { categoryFilter, limit: queryLimit = 6, orderByField = "createdAt", orderDirection = "desc" } = options;
+
+        const constraints = [];
+        if (categoryFilter) {
+            constraints.push(where("categoryId", "==", categoryFilter));
+        }
+        constraints.push(orderBy(orderByField, orderDirection));
+
+        constraints.push(startAfter(lastVisible));
+
+        constraints.push(limit(queryLimit));
+
+        const q = query(collection(db, COLLECTION_NAME), ...constraints);
+        const querySnapshot = await getDocs(q);
+
+        const blogs: BlogPost[] = [];
+        querySnapshot.forEach((doc) => {
+            blogs.push({ id: doc.id, ...doc.data() } as BlogPost);
+        });
+
+        const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+        return {
+            blogs: blogs,
+            lastVisibleDoc: newLastVisible || null
+        };
+    } catch (error) {
+        console.error("Error getting more blog posts:", error);
+        throw error;
+    }
+};
