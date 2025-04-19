@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useParams } from "react-router";
-import { getBlogPostById } from "../services/blogService";
+import { getAllBlogPosts, getBlogPostById } from "../services/blogService";
 import { BlogPost } from "../interfaces/blog.interface";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../store/AuthStore";
+import BlogCard from "../components/BlogCard";
 
 const ViewPostPage = () => {
     const { id } = useParams();
@@ -12,15 +13,16 @@ const ViewPostPage = () => {
     const [post, setPost] = useState<BlogPost | null>(null);
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const [similarPosts, setSimilarPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        
+
         const fetchPost = async () => {
             try {
                 const response = await getBlogPostById(id!);
-                
-                if(response) {
+
+                if (response) {
                     setPost(response);
                 }
 
@@ -33,8 +35,23 @@ const ViewPostPage = () => {
             }
         };
 
+        const fetchSimilarPosts = async () => {
+            try {
+                const { blogs } = await getAllBlogPosts({
+                    categoryFilter: post?.categoryId,
+                    limit: 3,
+                    orderByField: "createdAt",
+                    orderDirection: "desc"
+                });
+                setSimilarPosts(blogs.filter((p) => p.id !== id));
+            } catch (error) {
+                console.error("Error fetching similar posts:", error);
+            }
+        }
+
         fetchPost();
-    }, [id, navigate]);
+        fetchSimilarPosts();
+    }, [id, navigate, post?.categoryId]);
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
@@ -190,56 +207,17 @@ const ViewPostPage = () => {
                     className="mt-8 sm:mt-10 md:mt-12 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-700"
                 >
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Related Posts</h2>
+                    {
+                        similarPosts.length === 0 && (
+                            <p className="text-gray-500 dark:text-gray-400">No related posts found.</p>
+                        )
+                    }
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        {/* Related Post Block */}
-                        {/* TODO: bring the 1st 2 posts of the same category that aren't that post and display them here */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                            <div className="h-36 sm:h-48 overflow-hidden">
-                                <img
-                                    src="https://source.unsplash.com/random/800x600/?coding"
-                                    alt="Related post"
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                />
-                            </div>
-                            <div className="p-3 sm:p-4">
-                                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Tech</span>
-                                <h3 className="mt-1 text-base sm:text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                                    Getting Started with React Hooks
-                                </h3>
-                                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                                    Learn how to use React's hooks API to build powerful, reusable components
-                                </p>
-                                <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                                    <span>April 10, 2025</span>
-                                    <span className="mx-1 sm:mx-2">•</span>
-                                    <span>4 min read</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                            <div className="h-36 sm:h-48 overflow-hidden">
-                                <img
-                                    src="https://source.unsplash.com/random/800x600/?programming"
-                                    alt="Related post"
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                />
-                            </div>
-                            <div className="p-3 sm:p-4">
-                                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Tech</span>
-                                <h3 className="mt-1 text-base sm:text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                                    Getting Started with React Hooks
-                                </h3>
-                                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                                    Learn how to use React's hooks API to build powerful, reusable components
-                                </p>
-                                <div className="mt-2 sm:mt-3 flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                                    <span>April 10, 2025</span>
-                                    <span className="mx-1 sm:mx-2">•</span>
-                                    <span>4 min read</span>
-                                </div>
-                            </div>
-                        </div>
+                        {
+                            similarPosts.length > 0 && similarPosts.map((post) => (
+                                <BlogCard key={post.id} blog={post} />
+                            ))
+                        }
                     </div>
                 </motion.div>
             </div>
