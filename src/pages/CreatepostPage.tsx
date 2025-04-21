@@ -11,9 +11,9 @@ import { toast } from "react-toastify";
 import { CLOUDINARY_UPLOAD_PRESET, CLOUDINARY_UPLOAD_URL } from "../api/config";
 import { Category } from "../interfaces/category.interface";
 import { getAllCategories } from "../services/categoryService";
+import { object, string, array, ValidationError } from "yup";
 
 //TODO: create edit page same as this page
-//TODO: add middleware to this page
 
 const CreatePostPage = () => {
 
@@ -40,6 +40,16 @@ const CreatePostPage = () => {
         tags: [],
         currentTag: ""
     });
+
+    const postSchema = object({
+        title: string().required("Title is required"),
+        description: string().required("Description is required"),
+        categoryId: string().required("Category is required"),
+        content: string().required("Content is required"),
+        tags: array().of(string()).optional()
+    })
+
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const { user, isAuthenticated } = useAuthStore();
 
@@ -102,8 +112,7 @@ const CreatePostPage = () => {
                 categoryId: value,
                 categoryName: selectedCategory ? selectedCategory.name : ""
             }));
-            console.log("Selected category:", selectedCategory);
-            
+
             return;
         }
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -150,29 +159,29 @@ const CreatePostPage = () => {
     };
 
     const uploadImageToCloudinary = async (file: File): Promise<string | null> => {
-        setUploadStatus(prev => ({ 
-            ...prev, 
+        setUploadStatus(prev => ({
+            ...prev,
             isUploading: true,
             progress: 0,
-            error: null 
+            error: null
         }));
-        
+
         try {
             const formDataToUpload = new FormData();
             formDataToUpload.append('file', file);
             formDataToUpload.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
+
             return new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
-                
+
                 xhr.upload.addEventListener('progress', (event) => {
                     if (event.lengthComputable) {
                         const progress = Math.round((event.loaded / event.total) * 100);
                         setUploadStatus(prev => ({ ...prev, progress }));
                     }
                 });
-                
-                xhr.onreadystatechange = function() {
+
+                xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
                             const response = JSON.parse(xhr.responseText);
@@ -193,7 +202,7 @@ const CreatePostPage = () => {
                         }
                     }
                 };
-                
+
                 xhr.open('POST', CLOUDINARY_UPLOAD_URL, true);
                 xhr.send(formDataToUpload);
             });
@@ -219,9 +228,6 @@ const CreatePostPage = () => {
         } else if (trimmedTag && formData.tags.includes(trimmedTag)) {
             setFormData(prev => ({ ...prev, currentTag: "" }));
         }
-        //  else if (!trimmedTag) {
-        //     showFeedback("Please enter a tag", "warning");
-        // }
     };
 
     const removeTag = (tagToRemove: string) => {
@@ -240,9 +246,39 @@ const CreatePostPage = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setErrors({});
         setIsLoading(true);
 
-        if (!formData.title || !formData.categoryName || !formData.content) { //TODO: add proper validation
+        try {
+            const regex = /(<([^>]+)>)/ig
+            const cleanedContent = formData.content.replace(regex, '');
+            formData.content = cleanedContent;
+            const dataToValidate = {
+                title: formData.title,
+                description: formData.description,
+                categoryId: formData.categoryId,
+                content: formData.content,
+                tags: formData.tags,
+            };
+
+            await postSchema.validate(dataToValidate, { abortEarly: false });
+
+        } catch (err) {
+            if (err instanceof ValidationError) {
+                const formattedErrors: Record<string, string> = {};
+                err.inner.forEach(error => {
+                    if (error.path) {
+                        formattedErrors[error.path] = error.message;
+                    }
+                });
+                setErrors(formattedErrors);
+                toast.error("Please fix the errors in the form.");
+                setIsLoading(false);
+                return;
+            }
+            console.error("Unexpected validation error:", err);
+            toast.error("An unexpected error occurred during validation.");
+            setIsLoading(false);
             return;
         }
 
@@ -284,9 +320,9 @@ const CreatePostPage = () => {
         } catch (error) {
             console.error("Error creating blog post:", error);
             toast.error("Failed to create blog post. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
-
-
     };
 
     const modules = {
@@ -419,10 +455,10 @@ const CreatePostPage = () => {
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
-                                required
                                 className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base sm:text-lg transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md"
                                 placeholder="Enter title"
                             />
+                            {errors.title && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title}</p>}
                         </motion.div>
 
                         <motion.div variants={fadeInUp} initial="hidden" animate="visible" transition={{ delay: 0.1 }}>
@@ -434,7 +470,6 @@ const CreatePostPage = () => {
                                 name="category"
                                 value={formData.categoryId}
                                 onChange={handleChange}
-                                required
                                 className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md appearance-none"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: "right 0.75rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}
                             >
@@ -443,6 +478,7 @@ const CreatePostPage = () => {
                                     <option key={category.id} value={category.id}>{category.name}</option>
                                 ))}
                             </select>
+                            {errors.categoryId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.categoryId}</p>}
                         </motion.div>
                     </div>
 
@@ -457,8 +493,9 @@ const CreatePostPage = () => {
                             onChange={handleChange}
                             rows={2}
                             className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-shadow duration-200 ease-in-out shadow-sm hover:shadow-md"
-                            placeholder="Brief description (optional)"
+                            placeholder="Brief description"
                         />
+                        {errors.description && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
                     </motion.div>
 
                     <motion.div
@@ -481,6 +518,7 @@ const CreatePostPage = () => {
                                 className="bg-white dark:bg-gray-800 h-120 border-gray-300 dark:border-gray-700 rounded-lg pb-10 mb-10"
                             />
                         </div>
+                        {errors.content && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content}</p>}
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                             Use the toolbar above to format text, add links, and insert images.
                         </p>
