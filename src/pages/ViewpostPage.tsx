@@ -141,18 +141,20 @@ const ViewPostPage = () => {
                     className="w-full h-px bg-gradient-to-r from-transparent via-sky-500/30 to-transparent my-6 sm:my-8"
                 ></motion.div>
 
-                <motion.div
-                    variants={fadeInUp}
-                    initial="hidden"
-                    animate="visible"
-                    className="mb-6 sm:mb-8 rounded-lg sm:rounded-xl overflow-hidden shadow-md sm:shadow-lg"
-                >
-                    <img
-                        src={post.coverImage || "https://placehold.co/1200x630"}
-                        alt={post.title}
-                        className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
-                    />
-                </motion.div>
+                {post.coverImage && (
+                    <motion.div
+                        variants={fadeInUp}
+                        initial="hidden"
+                        animate="visible"
+                        className="mb-6 sm:mb-8 rounded-lg sm:rounded-xl overflow-hidden shadow-md sm:shadow-lg"
+                    >
+                        <img
+                            src={post.coverImage || "https://placehold.co/1200x630"}
+                            alt={post.title}
+                            className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
+                        />
+                    </motion.div>
+                )}
 
                 <motion.div
                     variants={fadeInUp}
@@ -163,27 +165,29 @@ const ViewPostPage = () => {
                     dangerouslySetInnerHTML={{ __html: post.content }}
                 ></motion.div>
 
-                <motion.div
-                    variants={fadeInUp}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: 0.3 }}
-                    className="mb-6 sm:mb-8"
-                >
-                    <h3 className="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
-                        Tags
-                    </h3>
-                    <div className="flex flex-wrap gap-1 sm:gap-2">
-                        {post.tags.map((tag) => (
-                            <span
-                                key={tag}
-                                className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 shadow-sm hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors cursor-pointer"
-                            >
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                </motion.div>
+                {post.tags.length > 0 && (
+                    <motion.div
+                        variants={fadeInUp}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ delay: 0.3 }}
+                        className="mb-6 sm:mb-8"
+                    >
+                        <h3 className="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
+                            Tags
+                        </h3>
+                        <div className="flex flex-wrap gap-1 sm:gap-2">
+                            {post.tags.map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 shadow-sm hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors cursor-pointer"
+                                >
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
                 {
                     post.authorId === user?.uid && (
