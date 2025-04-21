@@ -1,17 +1,25 @@
 import { motion } from "framer-motion";
-import { Search, X } from "lucide-react";
-import { useState } from "react";
+import { FileText, Loader2, Search, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import Modal from "./Modal";
+import { useDebounce } from "../../hooks/useDebounce";
+import { useNavigate } from "react-router";
+import { searchBlogPosts } from "../../services/blogService";
+import { BlogPost } from "../../interfaces/blog.interface";
 
 interface SearchModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSearch?: (query: string) => void; 
+    onSearch?: (query: string) => void;
 }
 
-const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSearch }) => {
+const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<unknown[]>([]); // TODO: Change
+    const [searchResults, setSearchResults] = useState<BlogPost[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
     const searchModalVariants = {
         hidden: {
@@ -38,17 +46,40 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSearch }) 
         setSearchQuery("");
     };
 
+    const performSearch = useCallback(async (query: string) => {
+        if (query.trim().length < 2) { 
+            setSearchResults([]);
+            setIsLoading(false);
+            setError(null);
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        try {
+            const results = await searchBlogPosts(query);
+            setSearchResults(results);
+        } catch (err) {
+            console.log(err);
+            setError("Failed to perform search. Please try again.");
+            setSearchResults([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        performSearch(debouncedSearchQuery);
+    }, [debouncedSearchQuery, performSearch]);
+
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // TODO: Implement actual search functionality here
-        console.log("Searching for:", searchQuery);
-        setSearchResults([]); // Replace with actual search results
-        setSearchQuery("");
+        performSearch(searchQuery);
+    };
 
-        if (onSearch) {
-            onSearch(searchQuery);
-        }
+    const handleResultClick = (blogId: string) => {
+        navigate(`/blog/${blogId}`);
+        handleClose();
     };
 
     return (
@@ -86,23 +117,47 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSearch }) 
                     </div>
 
                     <div className="p-4 max-h-80 overflow-y-auto">
-                        {searchQuery.length > 0 ? (
-                            searchResults.length > 0 ? (
-                                <div className="space-y-2">
-                                    {/* TODO: Replace with actual search results */}
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        Search results will go here
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                                    No results found for "{searchQuery}"
-                                </div>
-                            )
-                        ) : (
-                            <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                                Start typing to search...
+                        {isLoading && searchResults.length === 0 && (
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                <Loader2 className="animate-spin inline-block mr-2" size={16} /> Searching...
                             </div>
+                        )}
+                        {error && (
+                            <div className="text-center py-8 text-red-500 dark:text-red-400">
+                                {error}
+                            </div>
+                        )}
+                        {!isLoading && !error && debouncedSearchQuery.length > 0 && searchResults.length === 0 && (
+                            <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+                                No results found for "{debouncedSearchQuery}"
+                            </div>
+                        )}
+                        {!isLoading && !error && debouncedSearchQuery.length === 0 && (
+                            <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+                                Start typing to search for blog posts (title, tags)...
+                            </div>
+                        )}
+                        {!isLoading && !error && searchResults.length > 0 && (
+                            <ul className="space-y-1">
+                                {searchResults.map((blog) => (
+                                    <li key={blog.id}>
+                                        <button
+                                            onClick={() => handleResultClick(blog.id)}
+                                            className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-150"
+                                        >
+                                            <FileText size={18} className="text-gray-400 flex-shrink-0" />
+                                            <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-grow">
+                                                {blog.title}
+                                            </span>
+                                            {blog.categoryName && (
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded flex-shrink-0">
+                                                    {blog.categoryName}
+                                                </span>
+                                            )}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
                         )}
                     </div>
 

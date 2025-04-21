@@ -1,6 +1,8 @@
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp, startAfter,
+import {
+    collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp, startAfter,
     QueryDocumentSnapshot,
-    DocumentData  } from "firebase/firestore";
+    DocumentData
+} from "firebase/firestore";
 import { db } from "../api/firebase";
 import { Blog, BlogPost } from "../interfaces/blog.interface";
 
@@ -66,7 +68,7 @@ export const getBlogPostById = async (id: string): Promise<BlogPost | null> => {
     }
 };
 
-export const getAllBlogPosts = async (options: QueryOptions = {}):  Promise<PaginatedBlogResponse> => {
+export const getAllBlogPosts = async (options: QueryOptions = {}): Promise<PaginatedBlogResponse> => {
     try {
         const { categoryFilter, limit: queryLimit = 50, orderByField = "createdAt", orderDirection = "desc" } = options;
 
@@ -92,7 +94,7 @@ export const getAllBlogPosts = async (options: QueryOptions = {}):  Promise<Pagi
 
         return {
             blogs: blogs,
-            lastVisibleDoc: lastVisible || null, 
+            lastVisibleDoc: lastVisible || null,
         }
     } catch (error) {
         console.error("Error getting blog posts:", error);
@@ -190,6 +192,59 @@ export const getMoreBlogPosts = async (
         };
     } catch (error) {
         console.error("Error getting more blog posts:", error);
+        throw error;
+    }
+};
+
+export const searchBlogPosts = async (searchQuery: string, queryLimit: number = 10): Promise<BlogPost[]> => {
+    if (!searchQuery || searchQuery.trim() === "") {
+        return [];
+    }
+    
+    const titleQuery = query(
+        collection(db, COLLECTION_NAME),
+        where("title", ">=", searchQuery),
+        where("title", "<=", searchQuery + '\uf8ff'),
+        orderBy("title"), 
+        limit(queryLimit)
+    );
+
+    const tagQuery = query(
+        collection(db, COLLECTION_NAME),
+        where("tags", "array-contains", searchQuery),
+        orderBy("createdAt", "desc"),
+        limit(queryLimit)
+    );
+
+    try {
+        console.log(`searching for titles startting with: "${searchQuery}"`);
+        const titleSnapshot = await getDocs(titleQuery);
+        const blogs: BlogPost[] = [];
+        const foundIds = new Set<string>(); 
+
+        titleSnapshot.forEach((doc) => {
+            if (!foundIds.has(doc.id)) {
+                blogs.push({ id: doc.id, ...doc.data() } as BlogPost);
+                foundIds.add(doc.id);
+            }
+        });
+
+        console.log(`tags search exact: "${searchQuery}"`);
+        const tagSnapshot = await getDocs(tagQuery);
+        tagSnapshot.forEach((doc) => {
+            if (!foundIds.has(doc.id)) { 
+                blogs.push({ id: doc.id, ...doc.data() } as BlogPost);
+                foundIds.add(doc.id);
+            }
+        });
+
+        blogs.sort((a, b) => (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0));
+        const finalBlogs = blogs.slice(0, queryLimit);
+
+        return finalBlogs;
+
+    } catch (error) {
+        console.error(`eror searching  for "${searchQuery}":`, error);
         throw error;
     }
 };
