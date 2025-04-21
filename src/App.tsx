@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import AuthLayout from './layouts/AuthLayout';
 import { ToastContainer } from 'react-toastify';
 import LoginPage from './pages/LoginPage';
+import EditPostPage from './pages/EditPostPage';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path='/' element={<HomePage />} />
             <Route path='/create' element={<CreatePostPage />} />
             <Route path='/blog/:id' element={<ViewPostPage />} />
+            <Route path='/blog/edit/:id' element={<EditPostPage />} />
           </Route>
           <Route element={<AuthLayout />}>
             <Route path="/register" element={<RegisterPage />} />
