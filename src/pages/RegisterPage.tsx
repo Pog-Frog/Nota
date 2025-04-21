@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import bgImage from "../assets/bg_1.png";
 import GoogleSvg from "../assets/google.svg";
 import { useAuthStore } from "../store/AuthStore";
+import { object, string, ValidationError, ref } from "yup";
+import { toast } from "react-toastify";
 
 const SignupPage = () => {
     const [fullName, setFullName] = useState("");
@@ -15,19 +17,50 @@ const SignupPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { register, isAuthenticated } = useAuthStore();
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-    //TODO: ADD yub schema for validaiton
+    const registerSchema = object({
+        fullName: string().required("Full name is required").min(3, "Full name must be at least 3 characters"),
+        email: string().email("Invalid email format").required("Email is required"),
+        password: string().min(8, "Password must be at least 8 characters").matches(/[a-zA-Z]/, "Password must contain a letter").required("Password is required"),
+        confirmPassword: string().oneOf([ref("password")], "Passwords must match").required("Confirm password is required"),
+    });
 
     useEffect(() => {
         if (isAuthenticated) {
             navigate("/");
         }
     }
-    , [isAuthenticated, navigate]);
+        , [isAuthenticated, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrors({});
         setIsLoading(true);
+
+        try {
+            await registerSchema.validate({ fullName, email, password, confirmPassword }, { abortEarly: false });
+
+        } catch (err) {
+            if (err instanceof ValidationError) {
+                const formattedErrors: Record<string, string> = {};
+                err.inner.forEach(error => {
+                    if (error.path) {
+                        formattedErrors[error.path] = error.message;
+                    }
+                });
+                setErrors(formattedErrors);
+                toast.error("Please fix the errors in the form.");
+                setIsLoading(false);
+                return;
+            }
+
+            console.error("Unexpected validation error:", err);
+            toast.error("An unexpected error occurred during validation.");
+            setIsLoading(false);
+            return;
+        }
+
         try {
             await register(email, password, fullName);
             navigate("/");
@@ -237,6 +270,7 @@ const SignupPage = () => {
                                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-200"
                                 placeholder="Enter your full name"
                             />
+                            {errors.fullName && <p id="fullName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName}</p>}
                         </motion.div>
 
                         <motion.div
@@ -256,6 +290,7 @@ const SignupPage = () => {
                                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-200"
                                 placeholder="Enter your email"
                             />
+                            {errors.email && <p id="fullName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
                         </motion.div>
 
                         <motion.div
@@ -293,10 +328,7 @@ const SignupPage = () => {
                                     )}
                                 </button>
                             </div>
-                            {/* Example error  */}
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Password must be at least 8 characters long
-                            </p>
+                            {errors.password && <p id="fullName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
                         </motion.div>
 
                         <motion.div
@@ -334,6 +366,7 @@ const SignupPage = () => {
                                     )}
                                 </button>
                             </div>
+                            {errors.confirmPassword && <p id="fullName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>}
                         </motion.div>
 
                         <motion.button
