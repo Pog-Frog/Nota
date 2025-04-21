@@ -250,12 +250,12 @@ const CreatePostPage = () => {
         try {
             const regex = /(<([^>]+)>)/ig
             const cleanedContent = formData.content.replace(regex, '');
-            formData.content = cleanedContent;
+            
             const dataToValidate = {
                 title: formData.title,
                 description: formData.description,
                 categoryId: formData.categoryId,
-                content: formData.content,
+                content: cleanedContent,
                 tags: formData.tags,
             };
 
