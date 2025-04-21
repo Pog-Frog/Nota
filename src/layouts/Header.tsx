@@ -64,10 +64,6 @@ const Header: React.FC<HeaderProps> = ({ showSearch = true }) => {
         setMenuOpen(!menuOpen);
     };
 
-    const handleSearch = (query: string) => {
-        console.log("Search query from header:", query);
-    };
-
     const logoVariants = {
         hover: {
             scale: 1.05,
@@ -331,7 +327,6 @@ const Header: React.FC<HeaderProps> = ({ showSearch = true }) => {
             <SearchModal
                 isOpen={searchOpen}
                 onClose={() => setSearchOpen(false)}
-                onSearch={handleSearch}
             />
         </>
     );
