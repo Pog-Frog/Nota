@@ -48,6 +48,7 @@ const CreatePostPage = () => {
     const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         if (!isAuthenticated) {
             toast.error("You must be logged in to create a blog post.");
             navigate("/login");
