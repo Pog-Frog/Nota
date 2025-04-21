@@ -64,7 +64,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
                 </h3>
 
                 <p className="text-gray-600 text-start dark:text-gray-300 text-base line-clamp-3 flex-grow">
-                    {blog.description}
+                    {blog.description!.length > 100 ? blog.description!.slice(0, 100) + "..." : blog.description}
                 </p>
 
                 <div className="w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full my-1"></div>
