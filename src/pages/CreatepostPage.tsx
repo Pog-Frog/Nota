@@ -13,8 +13,6 @@ import { Category } from "../interfaces/category.interface";
 import { getAllCategories } from "../services/categoryService";
 import { object, string, array, ValidationError } from "yup";
 
-//TODO: create edit page same as this page
-
 const CreatePostPage = () => {
 
     const navigate = useNavigate();

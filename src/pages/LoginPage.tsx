@@ -4,38 +4,65 @@ import { motion } from "framer-motion";
 import bgImage from "../assets/bg_1.png";
 import GoogleSvg from "../assets/google.svg";
 import { useAuthStore } from "../store/AuthStore";
+import { object, string, ValidationError } from "yup";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-    //TODO: ADD yub schema for validaiton
+    const loginSchema = object({
+        email: string().email("Invalid email").required("Email is required"),
+        password: string().required("Password is required").min(8, "Password must be at least 8 characters"),
+    });
 
     const { login, isAuthenticated, isLoading } = useAuthStore();
     
-        useEffect(() => {
-            if (isAuthenticated) {
-                navigate("/");
-            }
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate("/");
         }
-        , [isAuthenticated, navigate]);
+    }, [isAuthenticated, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrors({});
+
+        try {
+            await loginSchema.validate({ email, password }, { abortEarly: false });
+        } catch (err) {
+            if (err instanceof ValidationError) {
+                const formattedErrors: Record<string, string> = {};
+                err.inner.forEach(error => {
+                    if (error.path) {
+                        formattedErrors[error.path] = error.message;
+                    }
+                });
+                setErrors(formattedErrors);
+                toast.error("Please fix the errors in the form.");
+                return;
+            }
+
+            console.error("Unexpected validation error:", err);
+            toast.error("An unexpected error occurred during validation.");
+            return;
+        }
+
         try {
             await login(email, password);
-            navigate("/"); 
+            navigate("/");
         } catch (error) {
             console.log("Login failed:", error);
         }
     };
 
-    const handleGoogleLogin = async () => {
-        // TODO: implement Google login
-        console.log("Google login");
-    };
+    // const handleGoogleLogin = async () => {
+    //     // TODO: implement Google login
+    //     console.log("Google login");
+    // };
 
     return (
         <motion.div
@@ -230,6 +257,7 @@ const LoginPage = () => {
                                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-200"
                                 placeholder="Enter your email"
                             />
+                            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </motion.div>
 
                         <motion.div
@@ -267,6 +295,7 @@ const LoginPage = () => {
                                     )}
                                 </button>
                             </div>
+                            {errors.password && <p id="fullName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
                         </motion.div>
 
                         <motion.button
@@ -277,7 +306,7 @@ const LoginPage = () => {
                             whileTap={{ scale: 0.98 }}
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3 px-4 animate-gradient bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 relative overflow-hidden"
+                            className="w-full py-3 px-4 animate-gradient bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 relative overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <span className="inline-flex items-center">
@@ -292,7 +321,7 @@ const LoginPage = () => {
                             )}
                         </motion.button>
 
-                        <motion.div
+                        {/* <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 1.1, duration: 0.5 }}
@@ -333,7 +362,7 @@ const LoginPage = () => {
                                     Sign in with Google
                                 </>
                             )}
-                        </motion.button>
+                        </motion.button> */}
                     </motion.form>
 
                     <motion.div

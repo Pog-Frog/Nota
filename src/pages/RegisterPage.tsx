@@ -69,13 +69,13 @@ const SignupPage = () => {
         }
     };
 
-    const handleGoogleSignup = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            console.log("Signup with Google");
-        }, 1500);
-    };
+    // const handleGoogleSignup = () => {
+    //     setIsLoading(true);
+    //     setTimeout(() => {
+    //         setIsLoading(false);
+    //         console.log("Signup with Google");
+    //     }, 1500);
+    // };
 
     return (
         <motion.div
@@ -392,7 +392,7 @@ const SignupPage = () => {
                             )}
                         </motion.button>
 
-                        <motion.div
+                        {/* <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 1.1, duration: 0.5 }}
@@ -433,7 +433,7 @@ const SignupPage = () => {
                                     Sign up with Google
                                 </>
                             )}
-                        </motion.button>
+                        </motion.button> */}
                     </motion.form>
 
                     <motion.div
