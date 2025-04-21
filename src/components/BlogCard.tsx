@@ -1,5 +1,8 @@
 import { Link } from "react-router";
 import { BlogPost } from "../interfaces/blog.interface";
+import { useEffect, useState } from "react";
+import { Category } from "../interfaces/category.interface";
+import { getCategoryById } from "../services/categoryService";
 
 interface BlogCardProps {
     blog: BlogPost;
@@ -13,12 +16,29 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
         "bg-indigo-500/90",
     ];
 
+    const [category, setCategory] = useState<Category | null>(null);
+
+    useEffect(() => {
+        const fetchCategory = async () => {
+            try {
+                const category = await getCategoryById(blog.categoryId);
+
+                setCategory(category);
+            } catch (error) {
+                console.error("Error fetching category:", error);
+            }
+        }
+
+        fetchCategory();
+    }, [blog.categoryId]);
+
+
     return (
         <Link to={`/blog/${blog.id}`} className="flex flex-col rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] bg-white dark:bg-black border border-gray-200/30 dark:border-gray-700/30 h-full group">
             <div className="relative w-full h-56 overflow-hidden hover:cursor-pointer">
                 <img
                     className="w-fit h-fit object-cover transition-transform duration-500 group-hover:scale-105"
-                    src={blog.coverImage || "https://placehold.co/392x220"}
+                    src={blog.coverImage || category?.image || "https://via.placeholder.com/392x220.png?text=No+Image"}
                     alt="Blog post thumbnail"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
@@ -44,7 +64,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
                 </h3>
 
                 <p className="text-gray-600 text-start dark:text-gray-300 text-base line-clamp-3 flex-grow">
-                    {blog.description }
+                    {blog.description}
                 </p>
 
                 <div className="w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full my-1"></div>
