@@ -317,9 +317,9 @@ const EditPostPage = () => {
 
             const dataToValidate = {
                 title: formData.title,
-                description: cleanedContent,
+                description: formData.description,
                 categoryId: formData.categoryId,
-                content: formData.content,
+                content: cleanedContent,
                 tags: formData.tags,
             };
             await postSchema.validate(dataToValidate, { abortEarly: false });
