@@ -38,7 +38,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
             <div className="relative w-full h-56 overflow-hidden hover:cursor-pointer">
                 <img
                     className="w-fit h-fit object-cover transition-transform duration-500 group-hover:scale-105"
-                    src={blog.coverImage || category?.image || "https://via.placeholder.com/392x220.png?text=No+Image"}
+                    src={blog.coverImage || category?.image || "https://placehold.co/392x220.png?text=No+Image"}
                     alt="Blog post thumbnail"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>

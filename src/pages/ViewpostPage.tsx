@@ -149,7 +149,7 @@ const ViewPostPage = () => {
                         className="mb-6 sm:mb-8 rounded-lg sm:rounded-xl overflow-hidden shadow-md sm:shadow-lg"
                     >
                         <img
-                            src={post.coverImage || "https://placehold.co/1200x630"}
+                            src={post.coverImage || "https://placehold.co/1200x630?text=No+Image"}
                             alt={post.title}
                             className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
                         />
@@ -198,9 +198,9 @@ const ViewPostPage = () => {
                             transition={{ delay: 0.4 }}
                             className="flex justify-between items-center pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700"
                         >
-                            <Link to={`/edit/${post.id}`}>
+                            <Link to={`/blog/edit/${post.id}`}>
                                 <button
-                                    className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors text-sm sm:text-base"
+                                    className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors text-sm sm:text-base hover:cursor-pointer"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 sm:mr-2">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
