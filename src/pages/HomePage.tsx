@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BlogCard from "../components/BlogCard";
-import CategoryCard from "../components/CategoryCard";
-import CategorySection from "../components/CategorySection";
-import FilterButton from "../components/FilterButton";
+// import CategoryCard from "../components/CategoryCard";
+// import CategorySection from "../components/CategorySection";
+// import FilterButton from "../components/FilterButton";
 import HeroSection from "../components/HeroSection";
-import RecentBlogsSection from "../components/RecentBlogsSection";
+// import RecentBlogsSection from "../components/RecentBlogsSection";
 import Divider from "../components/ui/Divider";
 import { Category } from "../interfaces/category.interface";
 import { getAllCategories } from "../services/categoryService";
