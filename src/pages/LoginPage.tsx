@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import bgImage from "../assets/bg_1.png";
-import GoogleSvg from "../assets/google.svg";
+// import GoogleSvg from "../assets/google.svg";
 import { useAuthStore } from "../store/AuthStore";
 import { object, string, ValidationError } from "yup";
 import { toast } from "react-toastify";
